@@ -1,0 +1,125 @@
+#!/bin/zsh
+
+get_size() {
+    du -sm "$HOME" 2>/dev/null | cut -f1
+}
+
+START_SIZE=$(get_size)
+
+
+
+# ── Updates ────────────────────────────────────────────────
+
+echo " Updating Homebrew..."
+if command -v brew &>/dev/null; then
+    brew update &>/dev/null
+    brew upgrade &>/dev/null
+    brew cleanup -s &>/dev/null
+    brew autoremove &>/dev/null
+    
+fi
+
+
+if command -v mas &>/dev/null; then
+    mas upgrade &>/dev/null
+    
+
+fi
+
+if command -v npm &>/dev/null; then
+    npm install -g npm &>/dev/null
+    npm update -g &>/dev/null
+    npm cache clean --force &>/dev/null
+    
+fi
+
+
+if command -v pip3 &>/dev/null; then
+    pip3 install --upgrade pip &>/dev/null
+    pip3 cache purge &>/dev/null
+    
+fi
+
+echo ""
+
+
+# ── Logs & Trash ───────────────────────────────────────────
+
+find "$HOME/Library/Logs" -mindepth 1 -delete 2>/dev/null
+find "$HOME/Library/DiagnosticReports" -mindepth 1 -delete 2>/dev/null
+[ "$(ls -A ~/.Trash 2>/dev/null)" ] && rm -rf ~/.Trash/* 2>/dev/null
+
+
+# ── User Caches ────────────────────────────────────────────
+
+find "$HOME/Library/Caches" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null
+
+
+# ── VS Code ────────────────────────────────────────────────
+
+find "$HOME/Library/Application Support/Code/Cache" -mindepth 1 -delete 2>/dev/null
+find "$HOME/Library/Application Support/Code/CachedData" -mindepth 1 -delete 2>/dev/null
+find "$HOME/Library/Application Support/Code/CachedExtensionVSIXs" -mindepth 1 -delete 2>/dev/null
+
+
+# ── Firefox ────────────────────────────────────────────────
+
+
+
+# ── Zen Browser ────────────────────────────────────────────
+
+find "$HOME/Library/Application Support/zen/Profiles" -name "cache2" -type d -exec rm -rf {} + 2>/dev/null
+find "$HOME/Library/Application Support/zen/Profiles" -name "startupCache" -type d -exec rm -rf {} + 2>/dev/null
+find "$HOME/Library/Caches/Zen" -mindepth 1 -delete 2>/dev/null
+
+
+# ── Xcode ──────────────────────────────────────────────────
+
+rm -rf "$HOME/Library/Developer/Xcode/DerivedData" 2>/dev/null
+rm -rf "$HOME/Library/Developer/Xcode/Archives" 2>/dev/null
+rm -rf "$HOME/Library/Developer/CoreSimulator/Caches" 2>/dev/null
+
+
+# ── Python & C Junk ────────────────────────────────────────
+
+for dir in "$HOME/Documents" "$HOME/Desktop" "$HOME/Downloads" "$HOME/Projects" "$HOME/dev"; do
+    if [ -d "$dir" ]; then
+        find "$dir" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null
+        find "$dir" -name "*.pyc" -type f -delete 2>/dev/null
+        find "$dir" -name "a.out" -type f -delete 2>/dev/null
+        find "$dir" -name "*.o" -type f -delete 2>/dev/null
+        find "$dir" -name ".DS_Store" -type f -delete 2>/dev/null
+    fi
+done
+
+
+# ── node_modules in old projects ───────────────────────────
+
+for dir in "$HOME/Projects" "$HOME/dev" "$HOME/Documents"; do
+    if [ -d "$dir" ]; then
+        find "$dir" -name "node_modules" -type d -prune -exec rm -rf {} + 2>/dev/null
+    fi
+done
+
+
+# ── System maintenance ─────────────────────────────────────
+
+sudo periodic daily weekly monthly 2>/dev/null
+
+
+# ── Flush DNS cache ────────────────────────────────────────
+
+sudo dscacheutil -flushcache 2>/dev/null
+sudo killall -HUP mDNSResponder 2>/dev/null
+
+
+# ── Summary ────────────────────────────────────────────────
+
+END_SIZE=$(get_size)
+DIFF=$((START_SIZE - END_SIZE))
+
+echo ""
+
+echo "   Saved:      ${DIFF}MB"
+echo "   Home size:  ${END_SIZE}MB"
+echo "   Free space: $(df -h / | awk 'NR==2 {print $4}') available"

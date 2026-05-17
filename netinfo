@@ -1,0 +1,37 @@
+#!/bin/zsh
+
+echo ""
+
+# Local IP
+LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "unavailable")
+
+# Public IP
+PUBLIC_IP=$(curl -s --max-time 5 https://api.ipify.org 2>/dev/null || echo "unavailable")
+
+# Default gateway
+GATEWAY=$(netstat -nr 2>/dev/null | awk '/default/{print $2; exit}' || echo "unavailable")
+
+# DNS servers
+DNS=$(scutil --dns 2>/dev/null | awk '/nameserver/{print $3}' | sort -u | head -3 | tr '\n' '  ' | sed 's/  $//')
+
+# WiFi network name
+WIFI=$(networksetup -getairportnetwork en0 2>/dev/null | sed 's/Current Wi-Fi Network: //' || echo "unavailable")
+
+# Connection type
+if ipconfig getifaddr en0 &>/dev/null; then
+  IFACE="Wi-Fi (en0)"
+elif ipconfig getifaddr en1 &>/dev/null; then
+  IFACE="Ethernet (en1)"
+else
+  IFACE="unknown"
+fi
+
+echo "  Network Info"
+echo "  ────────────────────────────"
+echo "  Network   $WIFI"
+echo "  Interface $IFACE"
+echo "  Local IP  $LOCAL_IP"
+echo "  Public IP $PUBLIC_IP"
+echo "  Gateway   $GATEWAY"
+echo "  DNS       $DNS"
+echo ""
