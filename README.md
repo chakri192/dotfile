@@ -2,25 +2,10 @@
 
 Personal dotfiles and configuration for macOS development environment.
 
-## ⚠️ hidden files note
-
-Files and directories starting with a dot (`.vscode`, `.env`, etc.) are **hidden by default** in macOS Finder. To view them:
-
-**Finder:**
-```sh
-Cmd + Shift + .
-```
-
-**Terminal:**
-```sh
-ls -la                    # show all files including hidden
-open -a Finder .vscode    # open hidden folder in Finder
-```
-
 ## contents
 
 - **scripts/** — shell automation scripts
-- **.vscode/** — VS Code settings and recommended extensions (hidden folder)
+- **vscode/** — VS Code settings and recommended extensions
 
 ## scripts
 
@@ -73,31 +58,25 @@ Optimized settings for Python, JavaScript/TypeScript, C/C++, and web development
 
 ### setup
 
-#### Step 1: View hidden `.vscode` folder
+#### Step 1: Copy settings to VS Code
 
-The `.vscode` directory is hidden by default. To see it in Finder:
-```sh
-# In Finder, press Cmd + Shift + . (dot)
-# Or use terminal to open it:
-open -a Finder .vscode
-```
-
-#### Step 2: Copy settings to VS Code
+The `vscode/settings.json` file should be copied to VS Code's user settings directory:
 
 ```sh
-cp .vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
+cp vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
 ```
 
-Or manually:
-1. Open `.vscode/settings.json` in this repo
-2. Copy its contents
-3. Paste into VS Code: `Code` → `Preferences` → `Settings` (JSON tab)
+**Or manually in VS Code:**
+1. Open `vscode/settings.json` from this repo
+2. Copy all contents
+3. In VS Code: `Code` → `Preferences` → `Settings` → click `{}` (JSON tab)
+4. Paste the contents
 
-#### Step 3: Install recommended extensions
+#### Step 2: Install recommended extensions
 
-Open VS Code and go to **Extensions** → **Recommended** to see and install all extensions at once.
+Open VS Code and navigate to **Extensions** → **Recommended** to see all extensions at once, then install.
 
-Or install individually:
+**Or install via terminal:**
 ```sh
 code --install-extension ms-python.python
 code --install-extension charliermarsh.ruff
@@ -107,13 +86,20 @@ code --install-extension eamodio.gitlens
 code --install-extension vscode-icons-team.vscode-icons
 ```
 
-See `.vscode/extensions.json` for the full list:
+See `vscode/extensions.json` for the complete list of 20+ recommended extensions:
 
+**Categories:**
 - **Python**: Python, Ruff, Pylance, Jupyter
 - **Web**: ESLint, Prettier, CSS Peek, Path Intellisense
 - **Version Control**: GitLens, GitHub Pull Requests
 - **AI**: GitHub Copilot Chat, Gemini Code Assist, Continue
 - **Utilities**: Error Lens, Hex Editor, YAML, EditorConfig
+
+#### Notes
+
+- Files in `vscode/` map to VS Code's hidden `.vscode/User/` directory
+- The `vscode/extensions.json` format is standard for VS Code workspace recommendations
+- All settings are commented and organized by feature for easy customization
 
 ## environment
 
