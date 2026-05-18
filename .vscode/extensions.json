@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "vscode-icons-team.vscode-icons",
+    "ms-vscode.cpptools",
+    "ms-vscode.hexeditor",
+    "redhat.vscode-yaml",
+    "ms-vscode-remote.remote-containers",
+    "ms-toolsai.jupyter",
+    "formulahendry.code-runner",
+    "usernamehw.errorlens",
+    "pranaygp.vscode-css-peek",
+    "christian-kohler.path-intellisense",
+    "editorconfig.editorconfig",
+    "continue.continue",
+    "github.copilot-chat",
+    "google.geminicodeassist",
+    "github.vscode-pull-request-github"
+  ]
+}
