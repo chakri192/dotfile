@@ -46,7 +46,7 @@
     "package.json": "package-lock.json, bun.lockb, yarn.lock, .eslintrc*, next.config*, tailwind.config*, tsconfig*",
     "*.sqlite": "${capture}.sqlite-shm, ${capture}.sqlite-wal",
     ".env": ".env.example, .env.local, .env.development, .env.production",
-    "Dockerfile": ".dockerignore, docker-compose*.yml"
+    "Dockerfile": ".dockerignore, docker-compose*.yml",
   },
   "files.exclude": {
     "**/.git": true,
@@ -56,7 +56,7 @@
     "**/.pytest_cache": true,
     "**/node_modules": true,
     "**/.venv": true,
-    "**/*.dSYM": true
+    "**/*.dSYM": true,
   },
   "files.autoSave": "onFocusChange",
   "files.hotExit": "onExitAndWindowClose",
@@ -100,7 +100,7 @@
   "breadcrumbs.symbolPath": "last",
   "editor.suggestSelection": "first",
   "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
+    "source.organizeImports": "explicit",
   },
   "workbench.colorCustomizations": {
     "editorRuler.foreground": "#ffffff15",
@@ -111,15 +111,15 @@
     "editorBracketGuide.activeBackground3": "#006666",
     "editorBracketGuide.background1": "#303030",
     "editorBracketGuide.background2": "#303030",
-    "editorBracketGuide.background3": "#303030"
+    "editorBracketGuide.background3": "#303030",
   },
   "editor.tokenColorCustomizations": {
     "textMateRules": [
       {
         "scope": "punctuation.definition.bracket",
-        "settings": { "foreground": "#606060" }
-      }
-    ]
+        "settings": { "foreground": "#606060" },
+      },
+    ],
   },
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -129,7 +129,7 @@
     "**/node_modules": true,
     "**/.venv": true,
     "**/dist": true,
-    "**/.git": true
+    "**/.git": true,
   },
   "search.useIgnoreFiles": true,
 
@@ -158,8 +158,8 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit",
-      "source.fixAll": "explicit"
-    }
+      "source.fixAll": "explicit",
+    },
   },
   "[markdown]": {
     "editor.wordWrap": "on",
@@ -167,11 +167,11 @@
     "editor.quickSuggestions": {
       "comments": "off",
       "strings": "off",
-      "other": "off"
-    }
+      "other": "off",
+    },
   },
   "[json][jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
   },
   "python.defaultInterpreterPath": "/opt/miniconda3/bin/python3",
   "python.condaPath": "/opt/miniconda3/bin/conda",
@@ -189,7 +189,7 @@
     "*.bin": "hexEditor.hexedit",
     "*.hex": "hexEditor.hexedit",
     "*.exe": "hexEditor.hexedit",
-    "*.o": "hexEditor.hexedit"
+    "*.o": "hexEditor.hexedit",
   },
   "workbench.editor.defaultBinaryEditor": "hexEditor.hexedit",
 
@@ -227,12 +227,19 @@
        INFRASTRUCTURE & SCHEMAS
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   "http.systemCertificatesNode": true,
+  "yaml.schemas": {
+    "file:///Users/chakri/.vscode/extensions/continue.continue-1.2.22-darwin-arm64/config-yaml-schema.json": [
+      ".continue/**/*.yaml"
+    ]
+  },
   "github.copilot.nextEditSuggestions.enabled": false,
   "github.copilot.enable": {
     "*": false,
     "plaintext": false,
     "markdown": false,
-    "scminput": false
+    "scminput": false,
   },
-  "diffEditor.codeLens": true
+  "diffEditor.codeLens": true,
+  // "vscode-kubernetes.helm-path-mac": "/path/to/helm",
+  // "vscode-kubernetes.minikube-path-mac": "/path/to/minikube",
 }
