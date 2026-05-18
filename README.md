@@ -2,10 +2,25 @@
 
 Personal dotfiles and configuration for macOS development environment.
 
+## ⚠️ hidden files note
+
+Files and directories starting with a dot (`.vscode`, `.env`, etc.) are **hidden by default** in macOS Finder. To view them:
+
+**Finder:**
+```sh
+Cmd + Shift + .
+```
+
+**Terminal:**
+```sh
+ls -la                    # show all files including hidden
+open -a Finder .vscode    # open hidden folder in Finder
+```
+
 ## contents
 
 - **scripts/** — shell automation scripts
-- **.vscode/** — VS Code settings and recommended extensions
+- **.vscode/** — VS Code settings and recommended extensions (hidden folder)
 
 ## scripts
 
@@ -58,26 +73,41 @@ Optimized settings for Python, JavaScript/TypeScript, C/C++, and web development
 
 ### setup
 
-1. Copy `.vscode/settings.json` to `~/Library/Application Support/Code/User/settings.json`
-   ```sh
-   cp .vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
-   ```
+#### Step 1: View hidden `.vscode` folder
 
-2. Install recommended extensions: Open VS Code and go to **Extensions** → **Recommended**
+The `.vscode` directory is hidden by default. To see it in Finder:
+```sh
+# In Finder, press Cmd + Shift + . (dot)
+# Or use terminal to open it:
+open -a Finder .vscode
+```
 
-   Or install manually:
-   ```sh
-   code --install-extension ms-python.python
-   code --install-extension charliermarsh.ruff
-   code --install-extension esbenp.prettier-vscode
-   code --install-extension dbaeumer.vscode-eslint
-   code --install-extension eamodio.gitlens
-   code --install-extension vscode-icons-team.vscode-icons
-   ```
+#### Step 2: Copy settings to VS Code
 
-### recommended extensions
+```sh
+cp .vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
+```
 
-See `.vscode/extensions.json` for the full list. Key extensions:
+Or manually:
+1. Open `.vscode/settings.json` in this repo
+2. Copy its contents
+3. Paste into VS Code: `Code` → `Preferences` → `Settings` (JSON tab)
+
+#### Step 3: Install recommended extensions
+
+Open VS Code and go to **Extensions** → **Recommended** to see and install all extensions at once.
+
+Or install individually:
+```sh
+code --install-extension ms-python.python
+code --install-extension charliermarsh.ruff
+code --install-extension esbenp.prettier-vscode
+code --install-extension dbaeumer.vscode-eslint
+code --install-extension eamodio.gitlens
+code --install-extension vscode-icons-team.vscode-icons
+```
+
+See `.vscode/extensions.json` for the full list:
 
 - **Python**: Python, Ruff, Pylance, Jupyter
 - **Web**: ESLint, Prettier, CSS Peek, Path Intellisense
