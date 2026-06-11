@@ -104,3 +104,12 @@ See `vscode/extensions.json` for the complete list of 20+ recommended extensions
 ## environment
 
 macOS (Apple Silicon) · zsh · VS Code · tested on M4 MacBook Air
+
+### AI tooling
+
+Documentation assisted by local LLMs via [Ollama](https://ollama.com):
+
+| Model | Used for |
+|-------|----------|
+| `qwen2.5-coder:7b` | Code suggestions, refactoring |
+| `llama3.1:8b` | Prose, documentation, commit messages |
