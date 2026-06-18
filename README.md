@@ -6,6 +6,7 @@ Personal dotfiles and configuration for macOS development environment.
 
 - **scripts/** — shell automation scripts
 - **vscode/** — VS Code settings and recommended extensions
+- **macos/** — launchd agents and Automator workflows
 
 ## scripts
 
@@ -100,6 +101,24 @@ See `vscode/extensions.json` for the complete list of 20+ recommended extensions
 - Files in `vscode/` map to VS Code's hidden `.vscode/User/` directory
 - The `vscode/extensions.json` format is standard for VS Code workspace recommendations
 - All settings are commented and organized by feature for easy customization
+
+## macOS automation
+
+launchd agents and Automator Services for system-level automation.
+
+| item | type | description |
+|------|------|-------------|
+| `com.user.capslock-remap.plist` | launchd agent | remaps Caps Lock key |
+| `Send to Gmail.workflow` | Automator Service | sends selection to Gmail |
+
+### install
+
+```sh
+cp macos/launchagents/com.user.capslock-remap.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.user.capslock-remap.plist
+
+cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
+```
 
 ## environment
 
