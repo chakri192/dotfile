@@ -111,6 +111,37 @@ launchd agents and Automator Services for system-level automation.
 | `com.user.capslock-remap.plist` | launchd agent | remaps Caps Lock key |
 | `Send to Gmail.workflow` | Automator Service | sends selection to Gmail |
 
+### com.user.capslock-remap.plist
+
+A launchd `LaunchAgent` that runs at every login (`RunAtLoad`) and calls `hidutil` to remap the Caps Lock key to Forward Delete at the HID level:
+
+```sh
+/usr/bin/hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x70000004C}]}'
+```
+
+- `0x700000039` — Keyboard/Keypad usage page, Caps Lock
+- `0x70000004C` — Keyboard/Keypad usage page, Forward Delete (`Del`)
+
+The remap is non-persistent at the OS level (`hidutil` resets on reboot), so the agent re-applies it on every login rather than once at install time. To check it's active or revert manually:
+
+```sh
+hidutil property --get "UserKeyMapping"               # inspect current mapping
+hidutil property --set '{"UserKeyMapping":[]}'         # clear all remaps
+```
+
+### Send to Gmail.workflow
+
+A Finder **Service** (Quick Action) — right-click one or more selected files → **Services → Send to Gmail**. It accepts the Finder selection as a list of file paths piped to a `Run Shell Script` Automator action (`/bin/bash`, input passed via stdin).
+
+What the script does:
+1. Reads the selected file paths line-by-line from stdin into a `FILES` array.
+2. Exits with an alert if nothing was selected.
+3. Escapes each path and builds an AppleScript fragment that attaches every selected file to a new Mail message.
+4. Drives `Mail.app` via `osascript` to create a message (subject: *"Files from Mac"*, body: *"Please find the attached files."*), attach the files, and send it — the compose window stays hidden (`visible:false`), so it sends silently without opening Mail's UI.
+5. Shows a "Sent!" notification on success.
+
+Requirements: `Mail.app` configured with a working account (the script just calls `send`, it doesn't pick an account — uses Mail's default). The recipient is hardcoded in the script as `RECIPIENT="your-email@gmail.com"` — edit `Contents/document.wflow` and replace that placeholder before use.
+
 ### install
 
 ```sh
