@@ -61,7 +61,7 @@
 					<key>COMMAND_STRING</key>
 					<string>#!/bin/bash
 
-RECIPIENT="chakradharv08@gmail.com"
+RECIPIENT="your-email@gmail.com"
 SUBJECT="Files from Mac"
 BODY="Please find the attached files."
 
