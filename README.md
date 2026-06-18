@@ -120,6 +120,8 @@ launchctl load ~/Library/LaunchAgents/com.user.capslock-remap.plist
 cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
 ```
 
+> **Note:** `Send to Gmail.workflow` ships with a placeholder recipient (`your-email@gmail.com`). Edit `Contents/document.wflow` and replace it with your own address before use.
+
 ## environment
 
 macOS (Apple Silicon) · zsh · VS Code · tested on M4 MacBook Air
