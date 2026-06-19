@@ -7,6 +7,7 @@ Personal dotfiles and configuration for macOS development environment.
 - **scripts/** — shell automation scripts
 - **vscode/** — VS Code settings and recommended extensions
 - **macos/** — launchd agents and Automator workflows
+- **services/** — Automator Quick Actions for Finder
 
 ## scripts
 
@@ -143,6 +144,38 @@ cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
 
 - `hidutil` — built into macOS, used by capslock-remap
 - `Mail.app` — required by Send to Gmail, must have a configured account
+
+## services
+
+Automator Quick Actions registered as Finder Services.
+
+| item | type | description |
+|------|------|-------------|
+| `New Item.workflow` | Automator Quick Action | right-click empty space in Finder → create new file or folder |
+
+### finder-new-item
+
+- Finder Quick Action — right-click empty space → **Services → New Item**
+- Prompts a type picker with 10 options: Folder, `.txt`, `.md`, `.rtf`, `.html`, `.sh`, `.py`, `.js`, `.json`, `.c`
+- Uses native Finder API (`make new folder/file at`) — no shell invocations
+- Collision-safe: auto-increments filename if one already exists
+- Triggers inline rename automatically after creation
+- Falls back to Desktop if no Finder window is open
+
+### install
+
+```sh
+cp -r "services/finder-new-item/New Item.workflow" ~/Library/Services/
+/System/Library/CoreServices/pbs -update ~/Library/Services/"New Item.workflow"
+killall Finder
+```
+
+Enable under `System Settings → Keyboard → Keyboard Shortcuts → Services → General → New Item`
+
+### dependencies
+
+- `Automator.app` — built into macOS
+- `System Events` — used for post-creation rename trigger
 
 ## environment
 
