@@ -151,16 +151,21 @@ Automator Quick Actions registered as Finder Services.
 
 | item | type | description |
 |------|------|-------------|
-| `New Item.workflow` | Automator Quick Action | right-click empty space in Finder → create new file or folder |
+| `New Item.workflow` | Automator Quick Action | creates a new file or folder in the current Finder directory |
 
 ### finder-new-item
 
-- Finder Quick Action — right-click empty space → **Services → New Item**
-- Prompts a type picker with 10 options: Folder, `.txt`, `.md`, `.rtf`, `.html`, `.sh`, `.py`, `.js`, `.json`, `.c`
-- Uses native Finder API (`make new folder/file at`) — no shell invocations
-- Collision-safe: auto-increments filename if one already exists
-- Triggers inline rename automatically after creation
-- Falls back to Desktop if no Finder window is open
+Adds a **New Item** entry to Finder's Services menu — replicating the Windows right-click New submenu on macOS.
+
+Supports 10 types: Folder, `.txt`, `.md`, `.rtf`, `.html`, `.sh`, `.py`, `.js`, `.json`, `.c`
+
+> **Note:** macOS does not allow Automator Services to inject entries directly into
+> Finder's right-click context menu. That requires a native **Finder Sync Extension**
+> built with Xcode. The Automator approach surfaces the action via:
+>
+> `Finder menu bar → Services → New Item`
+>
+> To build a true right-click integration, see [Xcode: Creating a Finder Sync Extension](https://developer.apple.com/documentation/findersync).
 
 ### install
 
@@ -171,6 +176,10 @@ killall Finder
 ```
 
 Enable under `System Settings → Keyboard → Keyboard Shortcuts → Services → General → New Item`
+
+### usage
+
+`Finder menu bar → Services → New Item` → pick type → inline rename fires automatically
 
 ### dependencies
 
