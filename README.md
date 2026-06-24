@@ -15,13 +15,14 @@ Personal dotfiles and configuration for macOS development environment.
 |--------|-------------|
 | `clean` | updates homebrew, mas, npm, pip and clears system caches, logs, browser data, and junk files |
 | `netinfo` | displays local ip, public ip, gateway, dns, and wifi network name |
+| `git-clean-branches` | scans all git repos in a folder and removes local branches already merged or with deleted remotes |
 
 ### install scripts
 
 ```sh
 git clone https://github.com/chakri192/dotfile ~/.dotfiles
 cd ~/.dotfiles
-chmod +x clean netinfo
+chmod +x clean netinfo git-clean-branches
 ```
 
 Add to your PATH in `~/.zshenv`:
@@ -35,6 +36,8 @@ export PATH="$HOME/.dotfiles:$PATH"
 ```sh
 clean       # run full system cleanup + updates
 netinfo     # show network info
+git-clean-branches            # preview merged/stale branches in current dir
+git-clean-branches ~/code -y  # delete them across all repos in ~/code
 ```
 
 ### dependencies
@@ -44,6 +47,26 @@ netinfo     # show network info
 - `brew` — homebrew package manager
 - `mas` — mac app store cli (`brew install mas`)
 - `npm`, `pip3` — optional, skipped if not installed
+- `git` — required by git-clean-branches
+
+### git-clean-branches
+
+Scans every git repo one level deep inside a given folder (defaults to the current directory) and identifies local branches that are safe to remove:
+
+1. Branches already merged into `main`/`master`
+2. Branches whose remote-tracking branch has been deleted (shows as `gone` in `git branch -vv`)
+
+`main` and `master` are never touched, and branches with unmerged commits are skipped unless `-f` is passed.
+
+```sh
+git-clean-branches                  # preview only, scans current directory
+git-clean-branches ~/Projects       # preview only, scans given path
+git-clean-branches -y               # actually delete what's found, current dir
+git-clean-branches ~/Projects -y    # actually delete what's found
+git-clean-branches ~/Projects -y -f # delete, force (-D) even if unmerged
+```
+
+Defaults to preview mode (no changes made) unless `-y` is passed.
 
 ## VS Code configuration
 
