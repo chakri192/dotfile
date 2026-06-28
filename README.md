@@ -1,4 +1,4 @@
-# dotfiles
+# dotfile
 
 Personal dotfiles and configuration for macOS development environment.
 
