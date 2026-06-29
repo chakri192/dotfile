@@ -1,0 +1,175 @@
+/* ============================================================
+   Zen Browser — userChrome.css
+   ============================================================ */
+
+/* 1. GLOBAL VARIABLES */
+:root {
+  --zen-panel-radius: 14px;
+  --zen-item-radius: 8px;
+  --zen-transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. COMMAND PALETTE - Force Solid & High Contrast */
+#zen-command-palette-container,
+#zen-command-palette,
+.zen-command-palette-wrapper {
+  background-color: light-dark(rgb(255, 255, 255), rgb(28, 28, 30)) !important;
+  backdrop-filter: none !important;
+  opacity: 1 !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 3. MEDIA INDICATOR - High Visibility Audio Toggle */
+.tabbrowser-tab .tab-icon-overlay:is([soundplaying], [activemedia-blocked]) {
+  background-color: var(--zen-primary-color) !important;
+  fill: white !important;
+  border-radius: 50% !important;
+  width: 16px !important;
+  height: 16px !important;
+  box-shadow: 0 0 8px var(--zen-primary-color) !important;
+}
+
+/* 4. SIDEBAR SPLITTER */
+#zen-sidebar-splitter {
+  width: 6px !important;
+  background: transparent !important;
+  transition: background var(--zen-transition) !important;
+}
+
+#zen-sidebar-splitter:hover {
+  background: var(--zen-primary-color) !important;
+  opacity: 0.3 !important;
+}
+
+/* 5. CONTEXT MENUS */
+menupopup {
+  --panel-border-radius: var(--zen-panel-radius) !important;
+  padding: 6px !important;
+  animation: zenFadeIn 0.1s ease !important;
+}
+
+menuitem, menu {
+  border-radius: var(--zen-item-radius) !important;
+  padding-block: 4px !important;
+  margin-block: 1px !important;
+  font-size: 13px !important;
+  transition: background var(--zen-transition) !important;
+}
+
+/* 6. TAB FOLDER LABELS */
+zen-folder > .tab-group-label-container > label {
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+  letter-spacing: 0.05em !important;
+  opacity: 0.6 !important;
+}
+
+/* 7. NOTIFICATION ANIMATIONS */
+notification-message {
+  animation: zenSlideIn 0.2s cubic-bezier(0, 0.5, 0.5, 1) !important;
+}
+
+@keyframes zenSlideIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+@keyframes zenFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+/* 8. DARK MODE CONTRAST FIX */
+@media (-moz-system-dark-theme) {
+  :root {
+    --toolbox-textcolor: rgba(255, 255, 255, 0.9) !important;
+  }
+  .urlbar {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+/* 9. MEDIA CONTROL POPUP - Dark Mode Fix */
+#zen-media-controls-toolbar,
+#zen-media-controls-toolbar toolbaritem,
+#zen-media-main-vbox,
+#zen-media-info-container,
+#zen-media-info-vbox,
+#zen-media-buttons-hbox,
+#zen-media-progress-hbox {
+  background-color: rgb(28, 28, 30) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+#zen-media-title,
+#zen-media-artist {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+#zen-media-current-time,
+#zen-media-duration {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* 10. SCROLLBARS - Thin & Subtle */
+scrollbar {
+  appearance: none !important;
+  width: 6px !important;
+  height: 6px !important;
+}
+
+scrollbar thumb {
+  appearance: none !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 99px !important;
+  min-height: 20px !important;
+}
+
+scrollbar thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+scrollbar track {
+  appearance: none !important;
+  background: transparent !important;
+}
+
+/* 11. URLBAR - Cleaner Focus State */
+#urlbar[focused] {
+  box-shadow: 0 0 0 2px var(--zen-primary-color) !important;
+  transition: box-shadow var(--zen-transition) !important;
+}
+
+#urlbar-background {
+  transition: background var(--zen-transition) !important;
+}
+
+/* 12. TAB HOVER - Smoother */
+.tabbrowser-tab .tab-content {
+  transition: background var(--zen-transition) !important;
+}
+
+/* 13. TOOLTIPS - Consistent Radius */
+tooltip {
+  border-radius: var(--zen-item-radius) !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+}
+
+/* 14. FINDBAR - Polished */
+#FindToolbar {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 4px 8px !important;
+}
+
+/* 15. TAB CLOSE BUTTON - Only Show on Hover */
+.tabbrowser-tab:not(:hover) .tab-close-button {
+  opacity: 0 !important;
+}
+
+.tabbrowser-tab:hover .tab-close-button {
+  opacity: 1 !important;
+  transition: opacity var(--zen-transition) !important;
+}
