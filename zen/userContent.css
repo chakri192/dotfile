@@ -1,0 +1,9 @@
+/* userContent.css - This targets web elements */
+@-moz-document url-prefix("http") {
+    div[class*="pip-wrapper"], 
+    div[id*="toggle-pip"] {
+        transform: scale(0.6) !important;
+        transform-origin: right center !important;
+        opacity: 0.7 !important;
+    }
+}
