@@ -170,15 +170,6 @@ user_pref("browser.sessionstore.interval", 60000);
 // Reduce disk I/O
 user_pref("browser.sessionstore.max_tabs_undo", 5);
 user_pref("browser.sessionstore.max_windows_undo", 2);
-user_pref("gfx.webrender.compositor", "metal");
-user_pref("gfx.compositor.glcontext.opaque", false);
-user_pref("image.mem.decode_bytes_at_a_time", 65536);
-user_pref("network.ssl_tokens_cache_records_per_server", 4);
-user_pref("nglayout.initialpaint.delay", 0);
-user_pref("nglayout.initialpaint.delay_in_oopif", 0);
-user_pref("browser.sessionstore.interval", 60000);
-user_pref("browser.sessionstore.max_tabs_undo", 5);
-user_pref("browser.sessionstore.max_windows_undo", 2);
 
 // Smoother async scrolling
 user_pref("apz.async-pan-zoom.enabled", true);
