@@ -13,9 +13,11 @@
 set -uo pipefail
 
 MODEL="llama3.1:8b"
+OLLAMA="/usr/local/bin/ollama"
+BAT="/opt/homebrew/bin/bat"
 
-if ! command -v ollama &>/dev/null; then
-  osascript -e 'display notification "ollama not found in PATH" with title "Send to Ollama"'
+if [ ! -x "$OLLAMA" ]; then
+  osascript -e 'display notification "ollama not found at /usr/local/bin/ollama" with title "Send to Ollama"'
   exit 1
 fi
 
@@ -27,13 +29,13 @@ for f in "$@"; do
   name="${base%.*}"
   out="$dir/${name}-summary.md"
 
-  content=$(bat --style=plain --paging=never "$f" 2>/dev/null) || content=$(<"$f")
+  content=$("$BAT" --style=plain --paging=never "$f" 2>/dev/null) || content=$(<"$f")
 
   prompt="Summarize the following document concisely, preserving key points and structure. Output only the summary, no preamble:
 
 $content"
 
-  summary=$(ollama run "$MODEL" "$prompt" 2>/dev/null)
+  summary=$("$OLLAMA" run "$MODEL" "$prompt" 2>/dev/null)
 
   if [ -z "$summary" ]; then
     osascript -e "display notification \"Failed: $base\" with title \"Send to Ollama\""
