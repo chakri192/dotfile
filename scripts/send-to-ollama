@@ -1,0 +1,45 @@
+#!/bin/zsh
+#
+# send-to-ollama
+#
+# Summarizes one or more text files via local Ollama (llama3.1:8b).
+# Writes each summary to <name>-summary.md next to the original.
+#
+# Usage:
+#   send-to-ollama file1.md file2.txt ...
+#
+# Wired as the "Send to Ollama" Finder Quick Action — see services/README.md.
+
+set -uo pipefail
+
+MODEL="llama3.1:8b"
+
+if ! command -v ollama &>/dev/null; then
+  osascript -e 'display notification "ollama not found in PATH" with title "Send to Ollama"'
+  exit 1
+fi
+
+for f in "$@"; do
+  [ -f "$f" ] || continue
+
+  dir=$(dirname "$f")
+  base=$(basename "$f")
+  name="${base%.*}"
+  out="$dir/${name}-summary.md"
+
+  content=$(bat --style=plain --paging=never "$f" 2>/dev/null) || content=$(<"$f")
+
+  prompt="Summarize the following document concisely, preserving key points and structure. Output only the summary, no preamble:
+
+$content"
+
+  summary=$(ollama run "$MODEL" "$prompt" 2>/dev/null)
+
+  if [ -z "$summary" ]; then
+    osascript -e "display notification \"Failed: $base\" with title \"Send to Ollama\""
+    continue
+  fi
+
+  print -r -- "$summary" > "$out"
+  osascript -e "display notification \"Saved $(basename "$out")\" with title \"Send to Ollama\""
+done

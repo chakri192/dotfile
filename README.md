@@ -19,13 +19,14 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 | `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed |
 | `netinfo`             | prints local IP, public IP, gateway, DNS servers, and current Wi-Fi network                     |
 | `git-clean-branches`  | scans one level deep for git repos and deletes local branches merged into `main`/`master` or with a gone remote-tracking branch; defaults to preview mode |
+| `send-to-ollama`      | summarizes a text file via local Ollama (`llama3.1:8b`), writes `<name>-summary.md` next to the original; backs the "Send to Ollama" Quick Action |
 
 ### install
 
 ```zsh
 git clone https://github.com/chakri192/dotfile ~/.dotfiles
 cd ~/.dotfiles
-chmod +x scripts/clean scripts/netinfo scripts/git-clean-branches
+chmod +x scripts/clean scripts/netinfo scripts/git-clean-branches scripts/send-to-ollama
 ```
 
 Add to `~/.zshenv`:
@@ -83,6 +84,16 @@ cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
 ```zsh
 cp -R "services/finder-new-item/New Item.workflow" ~/Library/Services/
 ```
+
+### Send to Ollama
+
+`services/send-to-ollama/Send to Ollama.workflow` — Finder Quick Action that runs selected files through `scripts/send-to-ollama` (local `llama3.1:8b` via Ollama), writing `<name>-summary.md` next to each original.
+
+```zsh
+cp -R "services/send-to-ollama/Send to Ollama.workflow" ~/Library/Services/
+```
+
+Requires `scripts/send-to-ollama` on `$PATH` (see [scripts install](#install)) and `bat` for content extraction. Depends on `~/.dotfiles/scripts/send-to-ollama` being at that literal path — the workflow's Run Shell Script step calls it via `$HOME/.dotfiles/scripts/send-to-ollama`.
 
 ---
 
