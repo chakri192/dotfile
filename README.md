@@ -174,3 +174,5 @@ Documentation assisted by local LLMs via [Ollama](https://ollama.com):
 | `qwen2.5-coder:7b` | code suggestions, refactoring         |
 | `llama3.1:8b`      | prose, documentation, commit messages |
 <!-- Pull Shark Test 1 -->
+
+
