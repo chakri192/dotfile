@@ -19,7 +19,6 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 | `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed |
 | `netinfo`             | prints local IP, public IP, gateway, DNS servers, and current Wi-Fi network                     |
 | `git-clean-branches`  | scans one level deep for git repos and deletes local branches merged into `main`/`master` or with a gone remote-tracking branch; defaults to preview mode |
-| `send-to-ollama`      | summarizes a text file via local Ollama (`llama3.1:8b`), writes `<name>-summary.md` next to the original; backs the "Send to Ollama" Quick Action |
 
 ### install
 
@@ -174,3 +173,4 @@ Documentation assisted by local LLMs via [Ollama](https://ollama.com):
 | ------------------ | ------------------------------------- |
 | `qwen2.5-coder:7b` | code suggestions, refactoring         |
 | `llama3.1:8b`      | prose, documentation, commit messages |
+<!-- Pull Shark Test 1 -->
