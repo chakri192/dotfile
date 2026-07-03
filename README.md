@@ -176,3 +176,5 @@ Documentation assisted by local LLMs via [Ollama](https://ollama.com):
 <!-- Pull Shark Test 1 -->
 
 
+
+<!-- Force Shark Badge -->
