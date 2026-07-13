@@ -168,9 +168,7 @@ Restart Zen — `user.js` values apply on every launch and override `prefs.js`.
 | Quick Action    | Demo |
 | --------------- | ---- |
 | New Item        | ![new item](assets/demos/new-item.gif) |
-
 | Send to Gmail   | ![send to gmail](assets/demos/send-to-gmail-1.gif) ![send to gmail](assets/demos/send-to-gmail-2.gif) |
-
 | Send to Ollama  | ![send to ollama](assets/demos/send-to-ollama.gif) |
 
 ---
