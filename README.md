@@ -19,13 +19,14 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 | `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed |
 | `netinfo`             | prints local IP, public IP, gateway, DNS servers, and current Wi-Fi network                     |
 | `git-clean-branches`  | scans one level deep for git repos and deletes local branches merged into `main`/`master` or with a gone remote-tracking branch; defaults to preview mode |
+| `repo-sync`          | scans one level deep for git repos in a base folder (default `~/Documents/portfolio`) and pulls any that are behind origin; repos that are ahead or have diverged are flagged instead of touched |
 
 ### install
 
 ```zsh
 git clone https://github.com/chakri192/dotfile ~/.dotfiles
 cd ~/.dotfiles
-chmod +x scripts/clean scripts/netinfo scripts/git-clean-branches scripts/send-to-ollama
+chmod +x scripts/clean scripts/netinfo scripts/git-clean-branches scripts/send-to-ollama scripts/repo-sync
 ```
 
 Add to `~/.zshenv`:

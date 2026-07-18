@@ -1,0 +1,44 @@
+#!/bin/zsh
+#
+# repo-sync
+#
+# Checks every git repo one level deep inside a base folder (default:
+# ~/Documents/portfolio) against its remote, and pulls any that are behind.
+# Repos that are ahead or have diverged are left alone and flagged, since
+# those need a deliberate push or manual merge rather than an automatic pull.
+#
+# Usage:
+#   repo-sync                # scan ~/Documents/portfolio
+#   repo-sync ~/dev           # scan a different base folder
+
+BASE="${1:-$HOME/Documents/portfolio}"
+
+if [[ ! -d "$BASE" ]]; then
+    echo "repo-sync: '$BASE' is not a directory" >&2
+    exit 1
+fi
+
+cd "$BASE" || exit 1
+
+for dir in */; do
+    [[ -d "$dir/.git" ]] || continue
+
+    echo "=== $dir ==="
+    (
+        cd "$dir" || exit 1
+        git fetch origin --quiet
+
+        gitstatus=$(git status -sb | head -1)
+
+        if echo "$gitstatus" | grep -q "behind"; then
+            echo "  behind — pulling..."
+            git pull
+        elif echo "$gitstatus" | grep -q "ahead"; then
+            echo "  ahead of origin — not pulling (push instead)"
+        elif echo "$gitstatus" | grep -q "diverged"; then
+            echo "  diverged — needs manual merge, skipping"
+        else
+            echo "  up to date"
+        fi
+    )
+done
