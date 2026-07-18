@@ -24,15 +24,15 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 ### install
 
 ```zsh
-git clone https://github.com/chakri192/dotfile ~/.dotfiles
-cd ~/.dotfiles
+git clone https://github.com/chakri192/dotfile ~/Documents/portfolio/dotfile
+cd ~/Documents/portfolio/dotfile
 chmod +x scripts/clean scripts/netinfo scripts/git-clean-branches scripts/send-to-ollama scripts/repo-sync
 ```
 
 Add to `~/.zshenv`:
 
 ```zsh
-export PATH="$HOME/.dotfiles/scripts:$PATH"
+export PATH="$HOME/Documents/portfolio/dotfile/scripts:$PATH"
 ```
 
 ### usage
@@ -93,7 +93,7 @@ cp -R "services/finder-new-item/New Item.workflow" ~/Library/Services/
 cp -R "services/send-to-ollama/Send to Ollama.workflow" ~/Library/Services/
 ```
 
-Requires `scripts/send-to-ollama` on `$PATH` (see [scripts install](#install)) and `bat` for content extraction. Depends on `~/.dotfiles/scripts/send-to-ollama` being at that literal path — the workflow's Run Shell Script step calls it via `$HOME/.dotfiles/scripts/send-to-ollama`.
+Requires `scripts/send-to-ollama` on `$PATH` (see [scripts install](#install)) and `bat` for content extraction. Depends on `~/Documents/portfolio/dotfile/scripts/send-to-ollama` being at that literal path — the workflow's Run Shell Script step calls it via `$HOME/Documents/portfolio/dotfile/scripts/send-to-ollama`.
 
 ---
 
