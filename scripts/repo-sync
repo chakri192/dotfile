@@ -9,7 +9,7 @@
 #
 # Usage:
 #   repo-sync                # scan ~/Documents/portfolio
-#   repo-sync ~/dev           # scan a different base folder
+#   repo-sync ~/dev          # scan a different base folder
 
 BASE="${1:-$HOME/Documents/portfolio}"
 
@@ -21,22 +21,34 @@ fi
 cd "$BASE" || exit 1
 
 for dir in */; do
-    [[ -d "$dir/.git" ]] || continue
+    [[ -e "$dir/.git" ]] || continue
 
-    echo "=== $dir ==="
+    echo "=== ${dir%/} ==="
     (
         cd "$dir" || exit 1
         git fetch origin --quiet
 
-        gitstatus=$(git status -sb | head -1)
+        # Skip repos with no configured upstream for the current branch.
+        if ! upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null); then
+            echo "  no upstream tracking branch — skipping"
+            exit 0
+        fi
 
-        if echo "$gitstatus" | grep -q "behind"; then
-            echo "  behind — pulling..."
-            git pull
-        elif echo "$gitstatus" | grep -q "ahead"; then
-            echo "  ahead of origin — not pulling (push instead)"
-        elif echo "$gitstatus" | grep -q "diverged"; then
-            echo "  diverged — needs manual merge, skipping"
+        # Precise ahead/behind counts relative to the upstream.
+        counts=$(git rev-list --left-right --count "@{u}...HEAD" 2>/dev/null) || {
+            echo "  could not compare with $upstream — skipping"
+            exit 0
+        }
+        behind=${counts%%[[:space:]]*}
+        ahead=${counts##*[[:space:]]}
+
+        if (( behind > 0 && ahead > 0 )); then
+            echo "  diverged ($ahead ahead, $behind behind) — needs manual merge, skipping"
+        elif (( behind > 0 )); then
+            echo "  behind by $behind — pulling..."
+            git pull --ff-only
+        elif (( ahead > 0 )); then
+            echo "  ahead of $upstream by $ahead — not pulling (push instead)"
         else
             echo "  up to date"
         fi
