@@ -19,7 +19,7 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 | `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed |
 | `netinfo`             | prints local IP, public IP, gateway, DNS servers, and current Wi-Fi network                     |
 | `git-clean-branches`  | scans one level deep for git repos and deletes local branches merged into `main`/`master` or with a gone remote-tracking branch; defaults to preview mode |
-| `repo-sync`          | scans one level deep for git repos in a base folder (default `~/Documents/portfolio`) and pulls any that are behind origin; repos that are ahead or have diverged are flagged instead of touched |
+| `repo-sync`          | scans one level deep for git repos in a base folder (default `~/Documents/portfolio`) and fast-forward pulls (`--ff-only`) any that are behind origin; repos that are ahead, diverged, or have no upstream are flagged and skipped instead of touched |
 
 ### install
 
