@@ -1,125 +1,142 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
+#
+# clean — macOS maintenance: update package managers, purge caches, report freed space.
+#
+# Usage:
+#   clean                  full cleanup (updates + caches + logs + trash + dev junk)
+#   clean -n | --dry-run   show what would be removed, delete nothing
+#   clean --node           also prune node_modules under project dirs (destructive)
+#   clean -h | --help      show this help
+#
+# node_modules pruning is opt-in: it wipes deps from active projects too, not
+# just stale ones, so you have to ask for it explicitly.
 
-get_size() {
-    du -sm "$HOME" 2>/dev/null | cut -f1
+set -u
+setopt null_glob
+
+DRY=false
+PRUNE_NODE=false
+
+for arg in "$@"; do
+  case "$arg" in
+    -n|--dry-run) DRY=true ;;
+    --node)       PRUNE_NODE=true ;;
+    -h|--help)    sed -n '3,13p' "$0" | sed 's/^#\{0,1\} \{0,1\}//'; exit 0 ;;
+    *) print -u2 -r -- "clean: unknown option '$arg' (try --help)"; exit 1 ;;
+  esac
+done
+
+$DRY && print -r -- " DRY RUN — nothing will be deleted\n"
+
+# Available KB on / — cheap, unlike scanning all of $HOME with du twice.
+avail_kb() { df -k / | awk 'NR==2 {print $4}'; }
+START_AVAIL=$(avail_kb)
+
+# rmrf <paths...> — remove, or just list existing targets in dry-run
+rmrf() {
+  local p
+  if $DRY; then
+    for p in "$@"; do [ -e "$p" ] && print -r -- "  would remove: $p"; done
+  else
+    rm -rf "$@" 2>/dev/null
+  fi
 }
 
-START_SIZE=$(get_size)
-
-
+# sweep <dir> <find-test-args...> — delete matches, or list them in dry-run
+sweep() {
+  local base="$1"; shift
+  [ -d "$base" ] || return 0
+  if $DRY; then
+    find "$base" "$@" -print 2>/dev/null | sed 's|^|  would remove: |'
+  else
+    find "$base" "$@" -exec rm -rf {} + 2>/dev/null
+  fi
+}
 
 # ── Updates ────────────────────────────────────────────────
-
-echo " Updating Homebrew..."
-if command -v brew &>/dev/null; then
+if $DRY; then
+  print -r -- " Would update: brew, mas, npm, pip (skipped in dry-run)"
+else
+  if command -v brew &>/dev/null; then
+    echo " Updating Homebrew..."
     brew update &>/dev/null
     brew upgrade &>/dev/null
     brew cleanup -s &>/dev/null
     brew autoremove &>/dev/null
-    
-fi
-
-
-if command -v mas &>/dev/null; then
-    mas upgrade &>/dev/null
-    
-
-fi
-
-if command -v npm &>/dev/null; then
+  fi
+  # `mas upgrade` was removed in recent mas versions; ignore if unsupported.
+  command -v mas &>/dev/null && mas upgrade &>/dev/null
+  if command -v npm &>/dev/null; then
     npm install -g npm &>/dev/null
     npm update -g &>/dev/null
     npm cache clean --force &>/dev/null
-    
-fi
-
-
-if command -v pip3 &>/dev/null; then
+  fi
+  if command -v pip3 &>/dev/null; then
     pip3 install --upgrade pip &>/dev/null
     pip3 cache purge &>/dev/null
-    
+  fi
 fi
-
 echo ""
-
 
 # ── Logs & Trash ───────────────────────────────────────────
-
-find "$HOME/Library/Logs" -mindepth 1 -delete 2>/dev/null
-find "$HOME/Library/DiagnosticReports" -mindepth 1 -delete 2>/dev/null
-[ "$(ls -A ~/.Trash 2>/dev/null)" ] && rm -rf ~/.Trash/* 2>/dev/null
-
+sweep "$HOME/Library/Logs" -mindepth 1 -maxdepth 1
+sweep "$HOME/Library/DiagnosticReports" -mindepth 1 -maxdepth 1
+rmrf ~/.Trash/*(DN)
 
 # ── User Caches ────────────────────────────────────────────
-
-find "$HOME/Library/Caches" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null
-
+sweep "$HOME/Library/Caches" -mindepth 1 -maxdepth 1 -type d
 
 # ── VS Code ────────────────────────────────────────────────
-
-find "$HOME/Library/Application Support/Code/Cache" -mindepth 1 -delete 2>/dev/null
-find "$HOME/Library/Application Support/Code/CachedData" -mindepth 1 -delete 2>/dev/null
-find "$HOME/Library/Application Support/Code/CachedExtensionVSIXs" -mindepth 1 -delete 2>/dev/null
-
-
-# ── Firefox ────────────────────────────────────────────────
-
-
+for sub in Cache CachedData CachedExtensionVSIXs; do
+  sweep "$HOME/Library/Application Support/Code/$sub" -mindepth 1 -maxdepth 1
+done
 
 # ── Zen Browser ────────────────────────────────────────────
-
-find "$HOME/Library/Application Support/zen/Profiles" -name "cache2" -type d -exec rm -rf {} + 2>/dev/null
-find "$HOME/Library/Application Support/zen/Profiles" -name "startupCache" -type d -exec rm -rf {} + 2>/dev/null
-find "$HOME/Library/Caches/Zen" -mindepth 1 -delete 2>/dev/null
-
+sweep "$HOME/Library/Application Support/zen/Profiles" -name cache2 -type d -prune
+sweep "$HOME/Library/Application Support/zen/Profiles" -name startupCache -type d -prune
+sweep "$HOME/Library/Caches/Zen" -mindepth 1 -maxdepth 1
 
 # ── Xcode ──────────────────────────────────────────────────
+rmrf "$HOME/Library/Developer/Xcode/DerivedData" \
+     "$HOME/Library/Developer/Xcode/Archives" \
+     "$HOME/Library/Developer/CoreSimulator/Caches"
 
-rm -rf "$HOME/Library/Developer/Xcode/DerivedData" 2>/dev/null
-rm -rf "$HOME/Library/Developer/Xcode/Archives" 2>/dev/null
-rm -rf "$HOME/Library/Developer/CoreSimulator/Caches" 2>/dev/null
-
-
-# ── Python & C Junk ────────────────────────────────────────
-
+# ── Python & C junk ────────────────────────────────────────
 for dir in "$HOME/Documents" "$HOME/Desktop" "$HOME/Downloads" "$HOME/Projects" "$HOME/dev"; do
-    if [ -d "$dir" ]; then
-        find "$dir" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null
-        find "$dir" -name "*.pyc" -type f -delete 2>/dev/null
-        find "$dir" -name "a.out" -type f -delete 2>/dev/null
-        find "$dir" -name "*.o" -type f -delete 2>/dev/null
-        find "$dir" -name ".DS_Store" -type f -delete 2>/dev/null
-    fi
+  sweep "$dir" -name __pycache__ -type d -prune
+  sweep "$dir" -name "*.pyc" -type f
+  sweep "$dir" -name a.out -type f
+  sweep "$dir" -name "*.o" -type f
+  sweep "$dir" -name .DS_Store -type f
 done
 
+# ── node_modules (opt-in via --node) ───────────────────────
+if $PRUNE_NODE; then
+  for dir in "$HOME/Projects" "$HOME/dev" "$HOME/Documents"; do
+    sweep "$dir" -name node_modules -type d -prune
+  done
+else
+  echo " Skipping node_modules (pass --node to prune them)"
+fi
 
-# ── node_modules in old projects ───────────────────────────
-
-for dir in "$HOME/Projects" "$HOME/dev" "$HOME/Documents"; do
-    if [ -d "$dir" ]; then
-        find "$dir" -name "node_modules" -type d -prune -exec rm -rf {} + 2>/dev/null
-    fi
-done
-
-
-# ── System maintenance ─────────────────────────────────────
-
-sudo periodic daily weekly monthly 2>/dev/null
-
-
-# ── Flush DNS cache ────────────────────────────────────────
-
-sudo dscacheutil -flushcache 2>/dev/null
-sudo killall -HUP mDNSResponder 2>/dev/null
-
+# ── System maintenance + DNS flush ─────────────────────────
+if $DRY; then
+  print -r -- " Would run: sudo periodic daily weekly monthly; flush DNS cache"
+else
+  sudo periodic daily weekly monthly 2>/dev/null
+  sudo dscacheutil -flushcache 2>/dev/null
+  sudo killall -HUP mDNSResponder 2>/dev/null
+fi
 
 # ── Summary ────────────────────────────────────────────────
-
-END_SIZE=$(get_size)
-DIFF=$((START_SIZE - END_SIZE))
+END_AVAIL=$(avail_kb)
+FREED_MB=$(( (END_AVAIL - START_AVAIL) / 1024 ))
+(( FREED_MB < 0 )) && FREED_MB=0
 
 echo ""
-
-echo "   Saved:      ${DIFF}MB"
-echo "   Home size:  ${END_SIZE}MB"
+if $DRY; then
+  echo "   (dry run — no space actually freed)"
+else
+  echo "   Freed:      ${FREED_MB}MB"
+fi
 echo "   Free space: $(df -h / | awk 'NR==2 {print $4}') available"
