@@ -63,26 +63,29 @@ for dir in "$ROOT"/*/; do
   (
     cd "$dir" || exit
 
-    # figure out the default branch (main or master)
+    # figure out the default branch (main or master) and the current branch
     default_branch=""
     if git show-ref --verify --quiet refs/heads/main; then
       default_branch="main"
     elif git show-ref --verify --quiet refs/heads/master; then
       default_branch="master"
     fi
+    current_branch="$(git symbolic-ref --short -q HEAD)"
 
     git fetch -p --quiet 2>/dev/null
 
-    # 1. local branches merged into default branch
+    # 1. local branches merged into default branch. --format gives bare names
+    #    (no leading '* '), and -x/-F match whole lines literally so a branch
+    #    like "main-wip" is never mistaken for "main".
     merged=""
     if [ -n "$default_branch" ]; then
-      merged=$(git branch --merged "$default_branch" \
-        | grep -v -e "^\*" -e " main$" -e " master$" -e "^  main$" -e "^  master$" \
-        | sed 's/^[* ] //')
+      merged=$(git branch --format='%(refname:short)' --merged "$default_branch" \
+        | grep -vxF -e "$default_branch" -e "$current_branch")
     fi
 
     # 2. local branches whose remote tracking branch is gone
-    gone=$(git branch -vv | awk '/: gone]/{print $1}' | sed 's/^\*//')
+    gone=$(git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
+        | awk '$2=="[gone]"{print $1}')
 
     # combine + dedupe
     candidates=$(printf "%s\n%s\n" "$merged" "$gone" | sed '/^$/d' | sort -u)
@@ -93,7 +96,7 @@ for dir in "$ROOT"/*/; do
       while IFS= read -r branch; do
         [ -z "$branch" ] && continue
         if $APPLY; then
-          if git branch "$DELETE_FLAG" "$branch" 2>/tmp/git_clean_err; then
+          if git branch "$DELETE_FLAG" "$branch" 2>/dev/null; then
             echo "  deleted: $branch"
           else
             echo "  skipped (not fully merged, use -f to force): $branch"
