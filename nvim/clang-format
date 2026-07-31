@@ -1,0 +1,21 @@
+# Global clang-format defaults (LLVM base, tuned).
+# Referenced by conform via --style=file:<this path>.
+# Symlink to ~/.clang-format to make clangd + any clang-format use it too.
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+PointerAlignment: Left
+AlignConsecutiveAssignments: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+BreakBeforeBraces: Attach
+SortIncludes: true
+IncludeBlocks: Regroup
+SpaceBeforeParens: ControlStatements
+Cpp11BracedListStyle: true
+---
+Language: Cpp
+Standard: c++20

@@ -8,6 +8,7 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 - **macos/** — LaunchAgents and Automator workflows
 - **services/** — Finder Quick Actions
 - **vscode/** — settings and recommended extensions
+- **nvim/** — modular Neovim config (native LSP, Treesitter, lazy.nvim)
 - **zen/** — Zen Browser `user.js`, chrome CSS, and theme store exports
 
 ---
@@ -123,6 +124,58 @@ jq -r '.recommendations[]' vscode/extensions.json | xargs -n1 code --install-ext
 ```
 
 20 total, spanning Python, C/C++, web, git, and AI tooling: `ms-python.python`, `charliermarsh.ruff`, `esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`, `eamodio.gitlens`, `ms-toolsai.jupyter`, `github.copilot-chat`, `google.geminicodeassist`, and more — see `vscode/extensions.json` for the full list.
+
+---
+
+## Neovim configuration
+
+A modular config targeting **Neovim 0.11+**, built on [lazy.nvim](https://github.com/folke/lazy.nvim) with native LSP (`vim.lsp.config`/`vim.lsp.enable`), Treesitter (`main` branch), and [blink.cmp](https://github.com/saghen/blink.cmp) completion.
+
+### layout
+
+| path                                                        | contents                                                              |
+| ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| `nvim/init.lua`                                             | leader keys, PATH shim for spawned jobs, module loader                |
+| `nvim/lua/config/`                                          | `options`, `keymaps`, `autocmds`, lazy bootstrap                      |
+| `nvim/lua/plugins/`                                        | one file per concern — lsp, completion, treesitter, telescope, git, ui, editor, dap, linting, extras |
+| `nvim/stylua.toml` · `nvim/ruff.toml` · `nvim/clang-format` | shared formatter/linter configs referenced by conform + ruff          |
+
+### features
+
+- **LSP** — native, no lspconfig framework; pyright, ruff, clangd, lua_ls, bashls, ts_ls, rust_analyzer, gopls, jsonls, yamlls, taplo, marksman, html, cssls via [mason](https://github.com/mason-org/mason.nvim)
+- **Completion** — blink.cmp with LSP, snippets, path, buffer, and lazydev sources
+- **Syntax** — Treesitter `main` branch: highlight, indent, folds, sticky context, textobjects
+- **Fuzzy find** — Telescope + fzf-native
+- **Git** — gitsigns for hunks, Neogit + diffview for per-file staging and commits
+- **Format** — conform on save (stylua, ruff, clang-format, shfmt, prettier, rustfmt, goimports, taplo)
+- **Lint** — ruff + clang-tidy, plus nvim-lint (shellcheck, yamllint, markdownlint, hadolint)
+- **Debug** — nvim-dap + dap-ui (Python via debugpy, C/C++/Rust via codelldb)
+- **QoL** — flash motions, oil, todo-comments, render-markdown, which-key, trouble, toggleterm, tokyonight
+
+### install
+
+```zsh
+# back up any existing config first
+[ -e ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.bak
+ln -s ~/Documents/portfolio/dotfile/nvim ~/.config/nvim
+nvim   # lazy.nvim bootstraps and installs the plugins on first launch
+```
+
+Then, inside nvim, install the external tool binaries via mason:
+
+```
+:MasonInstall prettierd shfmt stylua taplo goimports yamlfmt \
+  shellcheck markdownlint-cli2 yamllint hadolint debugpy codelldb
+```
+
+### dependencies
+
+- **neovim ≥ 0.11** — required for the native LSP API
+- **tree-sitter CLI** — `brew install tree-sitter`; the Treesitter `main` branch shells out to it to compile parsers
+- **ripgrep** — Telescope live-grep and `:grep`
+- **a C compiler** — clang/gcc, for building parsers
+- **a Nerd Font** — icons in the statusline, file tree, and completion menu
+- per-language toolchains (`go`, `cargo`, `node`) for the matching servers and formatters
 
 ---
 
