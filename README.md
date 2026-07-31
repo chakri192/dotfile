@@ -4,7 +4,7 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 
 ## contents
 
-- **scripts/** — `clean`, `netinfo`, `git-clean-branches`
+- **scripts/** — `clean`, `netinfo`, `git-clean-branches`, `repo-sync`, `send-to-ollama`
 - **macos/** — LaunchAgents and Automator workflows
 - **services/** — Finder Quick Actions
 - **vscode/** — settings and recommended extensions
@@ -17,7 +17,7 @@ Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple
 
 | script               | description                                                                                    |
 | -------------------- | ------------------------------------------------------------------------------------------------ |
-| `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed |
+| `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed. `--dry-run` previews, `--node` also prunes `node_modules` (opt-in, destructive) |
 | `netinfo`             | prints local IP, public IP, gateway, DNS servers, and current Wi-Fi network                     |
 | `git-clean-branches`  | scans one level deep for git repos and deletes local branches merged into `main`/`master` or with a gone remote-tracking branch; defaults to preview mode |
 | `repo-sync`          | scans one level deep for git repos in a base folder (default `~/Documents/portfolio`) and fast-forward pulls (`--ff-only`) any that are behind origin; repos that are ahead, diverged, or have no upstream are flagged and skipped instead of touched |
@@ -40,10 +40,13 @@ export PATH="$HOME/Documents/portfolio/dotfile/scripts:$PATH"
 
 ```zsh
 clean                        # full system cleanup + updates
+clean --dry-run              # show what would be deleted, change nothing
+clean --node                 # also prune node_modules under project dirs
 netinfo                      # show network info
 git-clean-branches           # preview stale branches in repos under cwd
 git-clean-branches ~/dev -y  # actually delete them
 git-clean-branches ~/dev -y -f  # force-delete even if unmerged
+repo-sync                    # ff-only pull repos under ~/Documents/portfolio
 ```
 
 ### dependencies
@@ -88,7 +91,7 @@ cp -R "services/finder-new-item/New Item.workflow" ~/Library/Services/
 
 ### Send to Ollama
 
-`services/send-to-ollama/Send to Ollama.workflow` — Finder Quick Action that runs selected files through `scripts/send-to-ollama` (local `llama3.1:8b` via Ollama), writing `<name>-summary.md` next to each original.
+`services/send-to-ollama/Send to Ollama.workflow` — Finder Quick Action that runs selected files through `scripts/send-to-ollama` (local Ollama, default `llama3.1:8b`, override with `OLLAMA_MODEL`), writing `<name>-summary.md` next to each original. See [`services/README.md`](services/README.md).
 
 ```zsh
 cp -R "services/send-to-ollama/Send to Ollama.workflow" ~/Library/Services/
@@ -238,6 +241,12 @@ Documentation assisted by local LLMs via [Ollama](https://ollama.com):
 | `qwen2.5-coder:7b` | code suggestions, refactoring         |
 | `llama3.1:8b`      | prose, documentation, commit messages |
 <!-- Pull Shark Test 1 -->
+
+---
+
+## license
+
+[MIT](LICENSE) © V Chakradhar
 
 
 
