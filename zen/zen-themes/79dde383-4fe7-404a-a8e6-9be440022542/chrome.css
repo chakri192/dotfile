@@ -6,7 +6,7 @@ menupopup, panel {
     box-sizing: border-box;
     padding: 6px !important;
     color: var(--panel-color);
-/*   
+/*
     background: var(--panel-background);
 */
     border-radius: 15px;
@@ -41,7 +41,7 @@ panel toolbarseparator {
 @media (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor") {
   :is(panelview .toolbarbutton-1, toolbarbutton.subviewbutton, .widget-overflow-list .toolbarbutton-1, .toolbaritem-combined-buttons:is(:not([cui-areatype="toolbar"]), [overflowedItem="true"]) > toolbarbutton) {
     &:not([disabled]):hover {
-      background-color: var(--mod-tidypopup-hovercolor); 
+      background-color: var(--mod-tidypopup-hovercolor);
     }
   }
 }
@@ -49,11 +49,11 @@ panel toolbarseparator {
 @media not (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor") {
   :is(panelview .toolbarbutton-1, toolbarbutton.subviewbutton, .widget-overflow-list .toolbarbutton-1, .toolbaritem-combined-buttons:is(:not([cui-areatype="toolbar"]), [overflowedItem="true"]) > toolbarbutton) {
     &:not([disabled]):hover {
-      background-color: rgba(80, 80, 250, 1); 
+      background-color: rgba(80, 80, 250, 1);
     }
   }
 }
-  
+
 #appMenu-zoom-controls {
   border-top: 3px solid color-mix(in hsl,var(--panel-border-color), transparent 100%);
   padding-top: 12px !important;
@@ -76,7 +76,7 @@ menu, menuitem, menucaption {
 @media (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor"){
   menu, menuitem, menucaption {
     &:not([disabled]):hover {
-      background-color: var(--mod-tidypopup-hovercolor); 
+      background-color: var(--mod-tidypopup-hovercolor);
     }
   }
 }
@@ -84,9 +84,9 @@ menu, menuitem, menucaption {
 @media not (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor"){
   menu, menuitem, menucaption {
     &:not([disabled]):hover {
-      background-color: rgba(80, 80, 250, 1); 
+      background-color: rgba(80, 80, 250, 1);
     }
-  } 
+  }
 }
 
 menuseparator::before {
@@ -94,7 +94,7 @@ menuseparator::before {
 }
 
 .panel-view-body-unscrollable {
-  border-radius: 8px !important; 
+  border-radius: 8px !important;
   background: var(--button-background-color-hover) !important;
   align-items: center;
   padding: 3px !important;

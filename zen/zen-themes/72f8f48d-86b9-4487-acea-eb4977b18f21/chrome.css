@@ -12,14 +12,14 @@
 
     --psu-better_ctrltab-background: light-dark(rgba(146, 145, 144, 0.94), rgba(24, 23, 22, 0.94));
     --psu-better_ctrltab-shadow_size: 20px;
-    
+
     --psu-better_ctrltab-preview_padding: 30px;
     --psu-better_ctrltab-preview_border_width: 1px;
     --psu-better_ctrltab-preview_border_color: light-dark(rgba(253, 255, 254, 0.1), rgba(83, 82, 79, 0.2));
     --psu-better_ctrltab-preview_focus_background: light-dark(rgba(77, 76, 78, 0.8), rgba(184, 185, 183, 0.18));
-    --psu-better_ctrltab-preview_font_size: 13px; 
+    --psu-better_ctrltab-preview_font_size: 13px;
     --psu-better_ctrltab-preview_letter_spacing: 0px;
-    
+
     --psu-better_ctrltab-preview_favicon_size: 36px;
     --psu-better_ctrltab-preview_favicon_outdent: 12px;
 /**/

@@ -10,7 +10,7 @@
 /* Author: @KiKaraage */
 /* Zen Context Menu v3.1 by KiKaraage */
 
-/* Fix ergonomics for tab context menu by applying some reorderings 
+/* Fix ergonomics for tab context menu by applying some reorderings
 * plus hiding disabled options and some separators
 * Applied by default when enabling Zen Context Menu mod */
 @media -moz-pref("uc.fixcontext.ergonomicsfortabs") {
@@ -53,12 +53,12 @@
     #context-zen-change-workspace-tab {
       order: -5 !important;
     }
-    :nth-child(35), /* Separator below "Change Tabs to Workspace" */ 
+    :nth-child(35), /* Separator below "Change Tabs to Workspace" */
     #context_sendTabToDevice,
     #context_zenSplitTabs,
     #context_undoCloseTab {
       order: -3 !important;
-    } 
+    }
     #context_closeTab,
     #context_closeDuplicateTabs,
     #context_zen-reset-pinned-tab,
@@ -352,7 +352,7 @@
 }
 
 @media -moz-pref("uc.fixcontext.restoreicons") {
-  /* PART 2: Adding start inline padding to options, 
+  /* PART 2: Adding start inline padding to options,
   * For now this also affected items with existing paddings
   * Like on toolbar context menu, or on extension options
   * Help me fix this, hit me up on github.com/KiKaraage/ZenMods/issues */
@@ -360,7 +360,7 @@
     @media (-moz-platform: windows) {
       padding-inline-start: 24px !important;
     }
-  }   
+  }
 
   /* PART 3: Adding icons back to regular context menu options */
   :not(:not(menubar) > menu, #ContentSelectDropdown)
@@ -395,7 +395,7 @@
     background-position: var(--zen-contextmenu-menuitem-padding-inline) center !important;
     background-repeat: no-repeat !important;
     -moz-context-properties: fill, fill-opacity !important;
-    fill: currentColor !important; 
+    fill: currentColor !important;
   }
 
   /* PART 5: Normalize left padding for options with checkboxes, like Compact Mode options
@@ -434,7 +434,7 @@
 /* PART 7:  Specifying icons to apply for other context menu options */
 /* Use icons from Zen icon directory - chrome://browser/skin/zen-icons/ */
 /* Use icons from Firefox icon directory - chrome://browser/skin/ */
-@media -moz-pref("uc.fixcontext.restoreicons") {  
+@media -moz-pref("uc.fixcontext.restoreicons") {
   #context_zenSplitTabs {
     --menu-image: url('chrome://browser/skin/zen-icons/sidebars-right.svg') !important;
   }
@@ -779,7 +779,7 @@
   #placesContext > menuitem[id="placesContext_sortBy:name"] {
     --menu-image: url('chrome://browser/skin/zen-icons/translations.svg');
   }
-} 
+}
 
 
 /* PART 8: Improving the text margin one by one */
@@ -796,8 +796,8 @@
       menuitem:not(.menuitem-iconic) > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
-    } 
+      }
+    }
   }
   /* 8B: Workspace Context Menu */
   #zenWorkspaceMoreActions {
@@ -809,7 +809,7 @@
       menuitem > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
+      }
     }
   }
   /* 8C: Content Area Context Menu */
@@ -828,8 +828,8 @@
       menuitem > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
-    } 
+      }
+    }
   }
   /* 8D: Text Context Menu */
   .textbox-contextmenu {
@@ -848,7 +848,7 @@
       menuitem > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
+      }
     }
   }
 }
@@ -1032,14 +1032,14 @@
 
     --psu-better_ctrltab-background: light-dark(rgba(146, 145, 144, 0.94), rgba(24, 23, 22, 0.94));
     --psu-better_ctrltab-shadow_size: 20px;
-    
+
     --psu-better_ctrltab-preview_padding: 30px;
     --psu-better_ctrltab-preview_border_width: 1px;
     --psu-better_ctrltab-preview_border_color: light-dark(rgba(253, 255, 254, 0.1), rgba(83, 82, 79, 0.2));
     --psu-better_ctrltab-preview_focus_background: light-dark(rgba(77, 76, 78, 0.8), rgba(184, 185, 183, 0.18));
-    --psu-better_ctrltab-preview_font_size: 13px; 
+    --psu-better_ctrltab-preview_font_size: 13px;
     --psu-better_ctrltab-preview_letter_spacing: 0px;
-    
+
     --psu-better_ctrltab-preview_favicon_size: 36px;
     --psu-better_ctrltab-preview_favicon_outdent: 12px;
 /**/
@@ -1166,7 +1166,7 @@
   --mod-browser-ease-swipe: var(--user-browser-ease-swipe, 0.3, 1.2, 0.5, 1);
   --mod-browser-ease-reset: var(--user-browser-ease-reset, 0.2, 1.4, 0.3, 1);
   --mod-browser-radius-default: var(--user-tab-radius, 8px);
-  --mod-browser-translate-x: var(--user-tab-movement, 2%); 
+  --mod-browser-translate-x: var(--user-tab-movement, 2%);
 }
 
 @media (-moz-bool-pref: "tab-shadow-enabled") {
@@ -1219,20 +1219,20 @@
       z-index: 1 !important;
       transition: width 0.5s ease-in-out, background 0.2s ease !important; /* Apply smooth transition on width and background */
     }    /* Current tab loading progress and muted status */
-    
-    
+
+
     .browserSidebarContainer.deck-selected:has([zen-glance-selected])::before,
     .browserSidebarContainer.deck-selected.zen-glance-overlay::before {
       max-width: calc(85%) !important;
       left: calc(15%/2) !important;
       border-radius: 6px !important;
     }
-    
+
     .browserSidebarContainer.deck-selected.zen-glance-background::before {
       background: transparent !important;
       height: 0px !important;
     }
-    
+
     :root {
       &:has(.tabbrowser-tab[selected][busy]) {
         --bar-colour: var(--zen-primary-color);
@@ -1253,7 +1253,7 @@
       &:has(.tabbrowser-tab[selected][muted]:not([busy])) {
         --bar-colour: orangered;
         --bar-pcent: 100%;
-        
+
         .browserSidebarContainer.deck-selected::before {
           border-radius: 0;
         }
@@ -1272,7 +1272,7 @@ menupopup, panel {
     box-sizing: border-box;
     padding: 6px !important;
     color: var(--panel-color);
-/*   
+/*
     background: var(--panel-background);
 */
     border-radius: 15px;
@@ -1307,7 +1307,7 @@ panel toolbarseparator {
 @media (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor") {
   :is(panelview .toolbarbutton-1, toolbarbutton.subviewbutton, .widget-overflow-list .toolbarbutton-1, .toolbaritem-combined-buttons:is(:not([cui-areatype="toolbar"]), [overflowedItem="true"]) > toolbarbutton) {
     &:not([disabled]):hover {
-      background-color: var(--mod-tidypopup-hovercolor); 
+      background-color: var(--mod-tidypopup-hovercolor);
     }
   }
 }
@@ -1315,11 +1315,11 @@ panel toolbarseparator {
 @media not (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor") {
   :is(panelview .toolbarbutton-1, toolbarbutton.subviewbutton, .widget-overflow-list .toolbarbutton-1, .toolbaritem-combined-buttons:is(:not([cui-areatype="toolbar"]), [overflowedItem="true"]) > toolbarbutton) {
     &:not([disabled]):hover {
-      background-color: rgba(80, 80, 250, 1); 
+      background-color: rgba(80, 80, 250, 1);
     }
   }
 }
-  
+
 #appMenu-zoom-controls {
   border-top: 3px solid color-mix(in hsl,var(--panel-border-color), transparent 100%);
   padding-top: 12px !important;
@@ -1342,7 +1342,7 @@ menu, menuitem, menucaption {
 @media (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor"){
   menu, menuitem, menucaption {
     &:not([disabled]):hover {
-      background-color: var(--mod-tidypopup-hovercolor); 
+      background-color: var(--mod-tidypopup-hovercolor);
     }
   }
 }
@@ -1350,9 +1350,9 @@ menu, menuitem, menucaption {
 @media not (-moz-bool-pref: "mod.tidypopup.usecustomhovercolor"){
   menu, menuitem, menucaption {
     &:not([disabled]):hover {
-      background-color: rgba(80, 80, 250, 1); 
+      background-color: rgba(80, 80, 250, 1);
     }
-  } 
+  }
 }
 
 menuseparator::before {
@@ -1360,7 +1360,7 @@ menuseparator::before {
 }
 
 .panel-view-body-unscrollable {
-  border-radius: 8px !important; 
+  border-radius: 8px !important;
   background: var(--button-background-color-hover) !important;
   align-items: center;
   padding: 3px !important;
@@ -1647,7 +1647,7 @@ findbar {
 	margin: 0px !important;
 
 	width: 90% !important;
-	max-width: calc(var(--theme-better_find_bar-textbox_width) * 1px); 
+	max-width: calc(var(--theme-better_find_bar-textbox_width) * 1px);
 
 	height: auto !important;
 

@@ -23,7 +23,7 @@ findbar {
 	margin: 0px !important;
 
 	width: 90% !important;
-	max-width: calc(var(--theme-better_find_bar-textbox_width) * 1px); 
+	max-width: calc(var(--theme-better_find_bar-textbox_width) * 1px);
 
 	height: auto !important;
 

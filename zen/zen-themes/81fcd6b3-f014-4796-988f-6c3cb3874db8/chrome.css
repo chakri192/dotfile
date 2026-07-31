@@ -1,6 +1,6 @@
 /* Zen Context Menu v3.1 by KiKaraage */
 
-/* Fix ergonomics for tab context menu by applying some reorderings 
+/* Fix ergonomics for tab context menu by applying some reorderings
 * plus hiding disabled options and some separators
 * Applied by default when enabling Zen Context Menu mod */
 @media -moz-pref("uc.fixcontext.ergonomicsfortabs") {
@@ -43,12 +43,12 @@
     #context-zen-change-workspace-tab {
       order: -5 !important;
     }
-    :nth-child(35), /* Separator below "Change Tabs to Workspace" */ 
+    :nth-child(35), /* Separator below "Change Tabs to Workspace" */
     #context_sendTabToDevice,
     #context_zenSplitTabs,
     #context_undoCloseTab {
       order: -3 !important;
-    } 
+    }
     #context_closeTab,
     #context_closeDuplicateTabs,
     #context_zen-reset-pinned-tab,
@@ -342,7 +342,7 @@
 }
 
 @media -moz-pref("uc.fixcontext.restoreicons") {
-  /* PART 2: Adding start inline padding to options, 
+  /* PART 2: Adding start inline padding to options,
   * For now this also affected items with existing paddings
   * Like on toolbar context menu, or on extension options
   * Help me fix this, hit me up on github.com/KiKaraage/ZenMods/issues */
@@ -350,7 +350,7 @@
     @media (-moz-platform: windows) {
       padding-inline-start: 24px !important;
     }
-  }   
+  }
 
   /* PART 3: Adding icons back to regular context menu options */
   :not(:not(menubar) > menu, #ContentSelectDropdown)
@@ -385,7 +385,7 @@
     background-position: var(--zen-contextmenu-menuitem-padding-inline) center !important;
     background-repeat: no-repeat !important;
     -moz-context-properties: fill, fill-opacity !important;
-    fill: currentColor !important; 
+    fill: currentColor !important;
   }
 
   /* PART 5: Normalize left padding for options with checkboxes, like Compact Mode options
@@ -424,7 +424,7 @@
 /* PART 7:  Specifying icons to apply for other context menu options */
 /* Use icons from Zen icon directory - chrome://browser/skin/zen-icons/ */
 /* Use icons from Firefox icon directory - chrome://browser/skin/ */
-@media -moz-pref("uc.fixcontext.restoreicons") {  
+@media -moz-pref("uc.fixcontext.restoreicons") {
   #context_zenSplitTabs {
     --menu-image: url('chrome://browser/skin/zen-icons/sidebars-right.svg') !important;
   }
@@ -769,7 +769,7 @@
   #placesContext > menuitem[id="placesContext_sortBy:name"] {
     --menu-image: url('chrome://browser/skin/zen-icons/translations.svg');
   }
-} 
+}
 
 
 /* PART 8: Improving the text margin one by one */
@@ -786,8 +786,8 @@
       menuitem:not(.menuitem-iconic) > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
-    } 
+      }
+    }
   }
   /* 8B: Workspace Context Menu */
   #zenWorkspaceMoreActions {
@@ -799,7 +799,7 @@
       menuitem > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
+      }
     }
   }
   /* 8C: Content Area Context Menu */
@@ -818,8 +818,8 @@
       menuitem > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
-    } 
+      }
+    }
   }
   /* 8D: Text Context Menu */
   .textbox-contextmenu {
@@ -838,7 +838,7 @@
       menuitem > .menu-text,
       menu > .menu-text {
         margin-inline-start: 0 !important;
-      } 
+      }
     }
   }
 }
