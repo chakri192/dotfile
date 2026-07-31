@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
 echo ""
 
@@ -14,8 +14,12 @@ GATEWAY=$(netstat -nr 2>/dev/null | awk '/default/{print $2; exit}' || echo "una
 # DNS servers
 DNS=$(scutil --dns 2>/dev/null | awk '/nameserver/{print $3}' | sort -u | head -3 | tr '\n' '  ' | sed 's/  $//')
 
-# WiFi network name
-WIFI=$(networksetup -getairportnetwork en0 2>/dev/null | sed 's/Current Wi-Fi Network: //' || echo "unavailable")
+# WiFi network name.
+# networksetup -getairportnetwork is gated behind Location Services on Sequoia+,
+# so try `ipconfig getsummary` first, then fall back.
+WIFI=$(ipconfig getsummary en0 2>/dev/null | awk -F' SSID : ' '/ SSID : /{print $2; exit}')
+[ -z "$WIFI" ] && WIFI=$(networksetup -getairportnetwork en0 2>/dev/null | sed 's/^Current Wi-Fi Network: //')
+[ -z "$WIFI" ] && WIFI="unavailable"
 
 # Connection type
 if ipconfig getifaddr en0 &>/dev/null; then
