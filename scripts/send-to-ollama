@@ -1,23 +1,30 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 #
 # send-to-ollama
 #
-# Summarizes one or more text files via local Ollama (llama3.1:8b).
+# Summarizes one or more text files via local Ollama.
 # Writes each summary to <name>-summary.md next to the original.
 #
 # Usage:
 #   send-to-ollama file1.md file2.txt ...
+#   OLLAMA_MODEL=qwen2.5:7b send-to-ollama file.md   # override the model
 #
 # Wired as the "Send to Ollama" Finder Quick Action — see services/README.md.
 
 set -uo pipefail
 
-MODEL="llama3.1:8b"
-OLLAMA="/usr/local/bin/ollama"
-BAT="/opt/homebrew/bin/bat"
+MODEL="${OLLAMA_MODEL:-llama3.1:8b}"
 
-if [ ! -x "$OLLAMA" ]; then
-  osascript -e 'display notification "ollama not found at /usr/local/bin/ollama" with title "Send to Ollama"'
+# Resolve binaries from PATH first (works for brew on Apple Silicon,
+# /usr/local, or the Ollama.app), falling back to common install paths.
+OLLAMA="$(command -v ollama || true)"
+[ -z "$OLLAMA" ] && for p in /opt/homebrew/bin/ollama /usr/local/bin/ollama; do
+  [ -x "$p" ] && OLLAMA="$p" && break
+done
+BAT="$(command -v bat || true)"
+
+if [ -z "$OLLAMA" ] || [ ! -x "$OLLAMA" ]; then
+  osascript -e 'display notification "ollama not found on PATH" with title "Send to Ollama"'
   exit 1
 fi
 
@@ -29,7 +36,11 @@ for f in "$@"; do
   name="${base%.*}"
   out="$dir/${name}-summary.md"
 
-  content=$("$BAT" --style=plain --paging=never "$f" 2>/dev/null) || content=$(<"$f")
+  if [ -n "$BAT" ]; then
+    content=$("$BAT" --style=plain --paging=never "$f" 2>/dev/null) || content=$(<"$f")
+  else
+    content=$(<"$f")
+  fi
 
   prompt="Summarize the following document concisely, preserving key points and structure. Output only the summary, no preamble:
 
