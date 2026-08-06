@@ -4,9 +4,9 @@
 
 # dotfiles
 
-**One macOS machine, written down.**
+**Configuration and automation for a single macOS machine.**
 
-Shell tools, a Neovim config, editor and browser settings, and the Finder actions that make the right-click menu useful.
+Shell utilities, a modular Neovim configuration, editor and browser settings, and Finder quick actions.
 
 <p>
   <img alt="Platform" src="https://img.shields.io/badge/macOS-Apple%20Silicon-1c1c1e?style=flat-square&logo=apple&logoColor=white" />
@@ -16,7 +16,7 @@ Shell tools, a Neovim config, editor and browser settings, and the Finder action
   <img alt="License" src="https://img.shields.io/badge/license-MIT-1c1c1e?style=flat-square" />
 </p>
 
-<sub>Tested on an M4 MacBook Air. Take the parts you want — nothing here depends on the rest.</sub>
+<sub>Tested on an M4 MacBook Air. Each directory is independent and can be adopted separately.</sub>
 
 </div>
 
@@ -35,7 +35,7 @@ Shell tools, a Neovim config, editor and browser settings, and the Finder action
 | **`macos/`** | a LaunchAgent and an Automator workflow |
 | **`services/`** | Finder Quick Actions |
 
-One thing worth knowing before you start: **only `nvim/` is symlinked.** Everything else is copied into place, so pulling this repo doesn't update your machine — you re-copy after a pull.
+**Only `nvim/` is symlinked.** Every other directory is copied into place, so updating this repository does not update the machine; the relevant files must be copied again after a pull.
 
 ---
 
