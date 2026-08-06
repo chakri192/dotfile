@@ -20,40 +20,39 @@ Shell utilities, a modular Neovim configuration, editor and browser settings, an
 
 </div>
 
-<br />
-
 ---
 
-## contents
+## Contents
 
-| directory | what's in it |
-|---|---|
-| **`scripts/`** | `clean`, `netinfo`, `git-clean-branches`, `repo-sync`, `send-to-ollama` |
-| **`nvim/`** | modular Neovim config — native LSP, Treesitter, lazy.nvim |
-| **`vscode/`** | settings and 20 recommended extensions |
-| **`zen/`** | Zen Browser `user.js`, chrome CSS, theme store exports |
-| **`macos/`** | a LaunchAgent and an Automator workflow |
-| **`services/`** | Finder Quick Actions |
+| Directory | Contents | Installs to |
+|---|---|---|
+| `scripts/` | Five zsh utilities | `$PATH`, via `~/.zshenv` |
+| `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim` (symlink) |
+| `vscode/` | Settings and 20 recommended extensions | `~/Library/Application Support/Code/User/` |
+| `zen/` | Zen Browser `user.js`, chrome CSS, theme exports | Profile root and `chrome/` |
+| `macos/` | A LaunchAgent and an Automator workflow | `~/Library/LaunchAgents/`, `~/Library/Services/` |
+| `services/` | Finder quick actions | `~/Library/Services/` |
 
 **Only `nvim/` is symlinked.** Every other directory is copied into place, so updating this repository does not update the machine; the relevant files must be copied again after a pull.
 
 ---
 
-## scripts
+## Scripts
 
-| script               | description                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------ |
-| `clean`               | updates brew/mas/npm/pip, purges caches (system, VS Code, Zen, Xcode DerivedData), clears logs/trash, flushes DNS, reports space freed. `--dry-run` previews, `--node` also prunes `node_modules` (opt-in, destructive) |
-| `netinfo`             | prints local IP, public IP, gateway, DNS servers, and current Wi-Fi network                     |
-| `git-clean-branches`  | scans one level deep for git repos and deletes local branches merged into `main`/`master` or with a gone remote-tracking branch; defaults to preview mode |
-| `repo-sync`          | scans one level deep for git repos in a base folder (default `~/Documents/portfolio`) and fast-forward pulls (`--ff-only`) any that are behind origin; repos that are ahead, diverged, or have no upstream are flagged and skipped instead of touched |
+| Script | Description |
+|---|---|
+| `clean` | Updates brew, mas, npm, and pip; purges system, VS Code, Zen, and Xcode DerivedData caches; clears logs and trash; flushes DNS; and reports space recovered. `--dry-run` previews without modifying anything. `--node` additionally prunes `node_modules` — opt-in, and destructive |
+| `netinfo` | Reports local IP, public IP, gateway, DNS servers, and the current Wi-Fi network |
+| `git-clean-branches` | Scans one level deep for repositories and deletes local branches merged into `main` or `master`, or whose remote-tracking branch is gone. Defaults to preview mode |
+| `repo-sync` | Scans one level deep for repositories under a base directory and fast-forward pulls those behind their upstream. Repositories that are ahead, diverged, or without an upstream are reported and skipped |
+| `send-to-ollama` | Summarises a file through a local Ollama model, writing `<name>-summary.md` alongside the original |
 
-### install
+### Installation
 
 ```zsh
 git clone https://github.com/chakri192/dotfile ~/Documents/portfolio/dotfile
 cd ~/Documents/portfolio/dotfile
-chmod +x scripts/clean scripts/netinfo scripts/git-clean-branches scripts/send-to-ollama scripts/repo-sync
+chmod +x scripts/*
 ```
 
 Add to `~/.zshenv`:
@@ -62,177 +61,145 @@ Add to `~/.zshenv`:
 export PATH="$HOME/Documents/portfolio/dotfile/scripts:$PATH"
 ```
 
-### usage
+### Usage
 
 ```zsh
-clean                        # full system cleanup + updates
-clean --dry-run              # show what would be deleted, change nothing
-clean --node                 # also prune node_modules under project dirs
-netinfo                      # show network info
-git-clean-branches           # preview stale branches in repos under cwd
-git-clean-branches ~/dev -y  # actually delete them
-git-clean-branches ~/dev -y -f  # force-delete even if unmerged
-repo-sync                    # ff-only pull repos under ~/Documents/portfolio
+clean                           # full cleanup and updates
+clean --dry-run                 # report what would be removed
+clean --node                    # additionally prune node_modules
+netinfo                         # network summary
+git-clean-branches              # preview stale branches under the current directory
+git-clean-branches ~/dev -y     # delete them
+repo-sync                       # fast-forward pull repositories under the base directory
 ```
 
-### dependencies
+### Dependencies
 
-- `zsh` — required shell
-- `curl` — used by `netinfo` for public IP lookup
-- `brew` — Homebrew (optional, skipped by `clean` if missing)
-- `mas` — Mac App Store CLI, `brew install mas` (optional)
-- `npm`, `pip3` — optional, skipped if not installed
-- `sudo` — `clean` needs it for `periodic` maintenance and DNS flush
+`zsh` is required. `curl` is used by `netinfo` for public IP lookup. Homebrew, `mas`, `npm`, and `pip3` are each optional and skipped by `clean` when absent. `clean` requires `sudo` for periodic maintenance and DNS flushing.
 
 ---
 
-## macos/
+## macOS integration
 
-### LaunchAgent — Caps Lock remap
+### Caps Lock remapping
 
-`macos/launchagents/com.user.capslock-remap.plist` remaps Caps Lock to Right Command via native `hidutil`, no Karabiner-Elements required.
+`macos/launchagents/com.user.capslock-remap.plist` remaps Caps Lock to Right Command using the native `hidutil` interface, with no third-party remapping software.
 
 ```zsh
 cp macos/launchagents/com.user.capslock-remap.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.user.capslock-remap.plist
 ```
 
-### Automator — Send to Gmail
+### Finder quick actions
 
-`macos/automator/Send to Gmail.workflow` is a Finder Quick Action that drives Mail.app via AppleScript to send selected files as attachments.
-
-```zsh
-cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
-```
-
----
-
-## services/
-
-`services/finder-new-item/New Item.workflow` — Finder Quick Action for creating new empty files (à la Windows' "New > Text Document") directly from the right-click menu.
+| Action | Description |
+|---|---|
+| **New Item** | Creates an empty file from the right-click menu |
+| **Send to Gmail** | Sends selected files as attachments through Mail.app via AppleScript |
+| **Send to Ollama** | Runs selected files through `scripts/send-to-ollama` and writes a summary alongside each original |
 
 ```zsh
 cp -R "services/finder-new-item/New Item.workflow" ~/Library/Services/
-```
-
-### Send to Ollama
-
-`services/send-to-ollama/Send to Ollama.workflow` — Finder Quick Action that runs selected files through `scripts/send-to-ollama` (local Ollama, default `llama3.1:8b`, override with `OLLAMA_MODEL`), writing `<name>-summary.md` next to each original. See [`services/README.md`](services/README.md).
-
-```zsh
+cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
 cp -R "services/send-to-ollama/Send to Ollama.workflow" ~/Library/Services/
 ```
 
-Requires `scripts/send-to-ollama` on `$PATH` (see [scripts install](#install)) and `bat` for content extraction. Depends on `~/Documents/portfolio/dotfile/scripts/send-to-ollama` being at that literal path — the workflow's Run Shell Script step calls it via `$HOME/Documents/portfolio/dotfile/scripts/send-to-ollama`.
+Send to Ollama requires `scripts/send-to-ollama` on `$PATH` and `bat` for content extraction. Its Run Shell Script step invokes the script at the literal path `$HOME/Documents/portfolio/dotfile/scripts/send-to-ollama`, so the repository must be cloned to that location or the workflow edited. See [`services/README.md`](services/README.md).
+
+| Quick Action | Demonstration |
+|---|---|
+| New Item | ![new item](assets/demos/new-item.gif) |
+| Send to Gmail | ![send to gmail](assets/demos/send-to-gmail-1.gif) ![send to gmail](assets/demos/send-to-gmail-2.gif) |
+| Send to Ollama | ![send to ollama](assets/demos/send-to-ollama.gif) |
 
 ---
 
-## VS Code configuration
+## Neovim
 
-Optimized settings for Python, JavaScript/TypeScript, C/C++, and web development.
+A modular configuration targeting **Neovim 0.11 or later**, built on [lazy.nvim](https://github.com/folke/lazy.nvim) with the native LSP API (`vim.lsp.config` and `vim.lsp.enable`), Treesitter from the `main` branch, and [blink.cmp](https://github.com/saghen/blink.cmp) completion.
 
-### features
+### Layout
 
-- **Performance** — disabled accessibility/telemetry, smooth scrolling, optimized minimap
-- **Typography** — JetBrains Mono with ligatures, 13.5px editor font
-- **File management** — smart nesting for related files (`.ts` with `.js`, `.h` with `.c`)
-- **Formatting** — Prettier (JS/JSON), Ruff (Python) with format-on-save
-- **Quality of life** — bracket colorization, sticky scroll, linked editing, bracket guides
-- **Language overrides** — Python (Ruff + imports), Markdown (word wrap, no format), JSON
+| Path | Contents |
+|---|---|
+| `nvim/init.lua` | Leader keys, PATH shim for spawned jobs, module loader |
+| `nvim/lua/config/` | `options`, `keymaps`, `autocmds`, lazy bootstrap |
+| `nvim/lua/plugins/` | One file per concern — LSP, completion, Treesitter, Telescope, git, UI, editor, DAP, linting |
+| `nvim/stylua.toml` · `nvim/ruff.toml` · `nvim/clang-format` | Formatter and linter configuration referenced by conform and ruff |
 
-### setup
+### Configuration
 
-```zsh
-cp vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
-```
+| Area | Detail |
+|---|---|
+| LSP | Native, without the lspconfig framework: pyright, ruff, clangd, lua_ls, bashls, ts_ls, rust_analyzer, gopls, jsonls, yamlls, taplo, marksman, html, cssls, installed through [mason](https://github.com/mason-org/mason.nvim) |
+| Completion | blink.cmp with LSP, snippet, path, buffer, and lazydev sources |
+| Syntax | Treesitter `main` branch — highlighting, indentation, folds, sticky context, textobjects |
+| Fuzzy finding | Telescope with fzf-native |
+| Git | gitsigns for hunks; Neogit and diffview for staging and commits |
+| Formatting | conform on save — stylua, ruff, clang-format, shfmt, prettier, rustfmt, goimports, taplo |
+| Linting | ruff and clang-tidy, plus nvim-lint for shellcheck, yamllint, markdownlint, and hadolint |
+| Debugging | nvim-dap with dap-ui — Python through debugpy, C/C++/Rust through codelldb |
+| Quality of life | flash, oil, todo-comments, render-markdown, which-key, trouble, toggleterm, tokyonight |
 
-Install extensions — open the folder in VS Code and accept the "Install Recommended Extensions" prompt, or:
-
-```zsh
-jq -r '.recommendations[]' vscode/extensions.json | xargs -n1 code --install-extension
-```
-
-20 total, spanning Python, C/C++, web, git, and AI tooling: `ms-python.python`, `charliermarsh.ruff`, `esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`, `eamodio.gitlens`, `ms-toolsai.jupyter`, `github.copilot-chat`, `google.geminicodeassist`, and more — see `vscode/extensions.json` for the full list.
-
----
-
-## Neovim configuration
-
-A modular config targeting **Neovim 0.11+**, built on [lazy.nvim](https://github.com/folke/lazy.nvim) with native LSP (`vim.lsp.config`/`vim.lsp.enable`), Treesitter (`main` branch), and [blink.cmp](https://github.com/saghen/blink.cmp) completion.
-
-### layout
-
-| path                                                        | contents                                                              |
-| ----------------------------------------------------------- | --------------------------------------------------------------------- |
-| `nvim/init.lua`                                             | leader keys, PATH shim for spawned jobs, module loader                |
-| `nvim/lua/config/`                                          | `options`, `keymaps`, `autocmds`, lazy bootstrap                      |
-| `nvim/lua/plugins/`                                        | one file per concern — lsp, completion, treesitter, telescope, git, ui, editor, dap, linting, extras |
-| `nvim/stylua.toml` · `nvim/ruff.toml` · `nvim/clang-format` | shared formatter/linter configs referenced by conform + ruff          |
-
-### features
-
-- **LSP** — native, no lspconfig framework; pyright, ruff, clangd, lua_ls, bashls, ts_ls, rust_analyzer, gopls, jsonls, yamlls, taplo, marksman, html, cssls via [mason](https://github.com/mason-org/mason.nvim)
-- **Completion** — blink.cmp with LSP, snippets, path, buffer, and lazydev sources
-- **Syntax** — Treesitter `main` branch: highlight, indent, folds, sticky context, textobjects
-- **Fuzzy find** — Telescope + fzf-native
-- **Git** — gitsigns for hunks, Neogit + diffview for per-file staging and commits
-- **Format** — conform on save (stylua, ruff, clang-format, shfmt, prettier, rustfmt, goimports, taplo)
-- **Lint** — ruff + clang-tidy, plus nvim-lint (shellcheck, yamllint, markdownlint, hadolint)
-- **Debug** — nvim-dap + dap-ui (Python via debugpy, C/C++/Rust via codelldb)
-- **QoL** — flash motions, oil, todo-comments, render-markdown, which-key, trouble, toggleterm, tokyonight
-
-### install
+### Installation
 
 ```zsh
-# back up any existing config first
 [ -e ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.bak
 ln -s ~/Documents/portfolio/dotfile/nvim ~/.config/nvim
-nvim   # lazy.nvim bootstraps and installs the plugins on first launch
+nvim   # lazy.nvim bootstraps and installs plugins on first launch
 ```
 
-Then, inside nvim, install the external tool binaries via mason:
+Then install the external tool binaries through mason:
 
 ```
 :MasonInstall prettierd shfmt stylua taplo goimports yamlfmt \
   shellcheck markdownlint-cli2 yamllint hadolint debugpy codelldb
 ```
 
-### dependencies
+### Dependencies
 
-- **neovim ≥ 0.11** — required for the native LSP API
-- **tree-sitter CLI** — `brew install tree-sitter`; the Treesitter `main` branch shells out to it to compile parsers
-- **ripgrep** — Telescope live-grep and `:grep`
-- **a C compiler** — clang/gcc, for building parsers
-- **a Nerd Font** — icons in the statusline, file tree, and completion menu
-- per-language toolchains (`go`, `cargo`, `node`) for the matching servers and formatters
+Neovim 0.11 or later is required for the native LSP API. The Treesitter `main` branch invokes the **tree-sitter CLI** to compile parsers (`brew install tree-sitter`), which in turn requires a **C compiler**. **ripgrep** backs Telescope live-grep and `:grep`. A **Nerd Font** provides the icons used in the statusline, file tree, and completion menu. Per-language toolchains — `go`, `cargo`, `node` — are required for the corresponding servers and formatters.
 
 ---
 
-## Zen Browser configuration
+## VS Code
 
-Performance and privacy tweaks for [Zen Browser](https://zen-browser.app), tuned for Apple Silicon.
+Settings tuned for Python, JavaScript and TypeScript, C and C++, and web development.
 
-### files
-
-| file                   | location in profile | description                                       |
-| ---------------------- | -------------------- | -------------------------------------------------- |
-| `zen/user.js`          | `<profile>/`          | `about:config` overrides applied on every launch  |
-| `zen/userChrome.css`   | `<profile>/chrome/`   | browser UI customization                          |
-| `zen/userContent.css`  | `<profile>/chrome/`   | webpage-level style overrides                     |
-| `zen/zen-themes.css`   | `<profile>/chrome/`   | Zen-specific theme overrides                      |
-| `zen/zen-themes/`      | `<profile>/chrome/zen-themes/` | exported Zen Theme Store themes (per-theme `chrome.css`, some with `preferences.json`) |
-
-### what user.js covers
-
-- **Performance** — WebRender/Metal compositor, 60fps frame rate, HTTP/3, DNS prefetch, larger disk/memory cache
-- **Memory** — incremental GC, background tab unloading after 3 min, reduced session I/O
-- **Privacy** — social/fingerprint/cryptomining tracking blocked, all Mozilla telemetry disabled
-- **Apple Silicon** — Metal GPU API, hardware video decode, async APZ scrolling, zero paint delay
-
-### install
+| Area | Configuration |
+|---|---|
+| Performance | Accessibility support and telemetry disabled, smooth scrolling, reduced minimap |
+| Typography | JetBrains Mono with ligatures at 13.5px |
+| File management | Smart nesting for related files — `.ts` with `.js`, `.h` with `.c` |
+| Formatting | Prettier for JS and JSON, Ruff for Python, both on save |
+| Editing | Bracket pair colourisation, sticky scroll, linked editing, indentation guides |
+| Language overrides | Python (Ruff with import organisation), Markdown (word wrap, no formatting), JSON |
 
 ```zsh
-# Find your profile folder: open Zen → about:support → Profile Folder
+cp vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
+jq -r '.recommendations[]' vscode/extensions.json | xargs -n1 code --install-extension
+```
+
+Twenty extensions spanning Python, C and C++, web, git, and AI tooling. The complete list is in `vscode/extensions.json`.
+
+---
+
+## Zen Browser
+
+Performance and privacy configuration for [Zen Browser](https://zen-browser.app), tuned for Apple Silicon.
+
+| File | Location in profile | Purpose |
+|---|---|---|
+| `zen/user.js` | Profile root | `about:config` overrides applied on every launch |
+| `zen/userChrome.css` | `chrome/` | Browser interface customisation |
+| `zen/userContent.css` | `chrome/` | Page-level style overrides |
+| `zen/zen-themes.css` | `chrome/` | Zen-specific theme overrides |
+| `zen/zen-themes/` | `chrome/zen-themes/` | Exported Zen Theme Store themes |
+
+`user.js` covers four areas: **performance** (WebRender and Metal compositor, 60fps frame rate, HTTP/3, DNS prefetch, enlarged caches), **memory** (incremental garbage collection, background tab unloading after three minutes, reduced session I/O), **privacy** (social, fingerprinting, and cryptomining tracker blocking; all telemetry disabled), and **Apple Silicon** (Metal GPU API, hardware video decoding, asynchronous scrolling, zero paint delay).
+
+```zsh
+# Locate the profile: Zen → about:support → Profile Folder
 PROFILE="$HOME/Library/Application Support/zen/Profiles/<your-profile>"
 
 cp zen/user.js "$PROFILE/"
@@ -240,40 +207,23 @@ cp zen/userChrome.css zen/userContent.css zen/zen-themes.css "$PROFILE/chrome/"
 cp -R zen/zen-themes "$PROFILE/chrome/"
 ```
 
-Restart Zen — `user.js` values apply on every launch and override `prefs.js`.
-
-> To permanently apply a setting without `user.js`, set it in `about:config` directly.
+Restart Zen. `user.js` values are applied on every launch and override `prefs.js`.
 
 ---
 
-## demos
+## Environment
 
-| Quick Action    | Demo |
-| --------------- | ---- |
-| New Item        | ![new item](assets/demos/new-item.gif) |
-| Send to Gmail   | ![send to gmail](assets/demos/send-to-gmail-1.gif) ![send to gmail](assets/demos/send-to-gmail-2.gif) |
-| Send to Ollama  | ![send to ollama](assets/demos/send-to-ollama.gif) |
+macOS on Apple Silicon, zsh, VS Code, and Zen Browser. Tested on an M4 MacBook Air.
 
----
-
-## environment
-
-macOS (Apple Silicon) · zsh · VS Code · Zen Browser · tested on M4 MacBook Air
-
-### AI tooling
-Documentation assisted by [aider](https://github.com/Aider-AI/aider) driving local LLMs via [Ollama](https://ollama.com):
-| model              | used for                              |
-| ------------------ | ------------------------------------- |
-| `qwen2.5-coder:7b` | code suggestions, refactoring         |
-| `llama3.1:8b`      | prose, documentation, commit messages |
-<!-- Pull Shark Test 1 -->
-
----
-
-## license
+## License
 
 [MIT](LICENSE) © V Chakradhar
 
+## Contributors
 
+| | |
+|---|---|
+| [chakri192](https://github.com/chakri192) | Author |
+| [aider](https://github.com/Aider-AI/aider) | AI pair programmer |
 
-<!-- Force Shark Badge -->
+Documentation assisted by aider using local models through [Ollama](https://ollama.com): `qwen2.5-coder:7b` for code and `llama3.1:8b` for prose.
