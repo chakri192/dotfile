@@ -1,15 +1,43 @@
+<div align="center">
+
 # dotfiles
 
-Personal macOS scripts, configs, and automation. Tested on M4 MacBook Air (Apple Silicon).
+**One macOS machine, written down.**
+
+Shell tools, a Neovim config, editor and browser settings, and the Finder actions that make the right-click menu useful.
+
+<p>
+  <img alt="Platform" src="https://img.shields.io/badge/macOS-Apple%20Silicon-1c1c1e?style=flat-square&logo=apple&logoColor=white" />
+  <img alt="Shell" src="https://img.shields.io/badge/zsh-5%20tools-1c1c1e?style=flat-square&logo=gnubash&logoColor=4EAA25" />
+  <img alt="Neovim" src="https://img.shields.io/badge/Neovim-0.11%2B-1c1c1e?style=flat-square&logo=neovim&logoColor=57A143" />
+  <img alt="Editor" src="https://img.shields.io/badge/VS%20Code-20%20extensions-1c1c1e?style=flat-square&logo=visualstudiocode&logoColor=007ACC" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-1c1c1e?style=flat-square" />
+</p>
+
+<br />
+
+<img src="docs/install-map.svg" width="840" alt="Each directory in the repo and where on the machine it installs to" />
+
+<sub>Tested on an M4 MacBook Air. Take the parts you want — nothing here depends on the rest.</sub>
+
+</div>
+
+<br />
+
+---
 
 ## contents
 
-- **scripts/** — `clean`, `netinfo`, `git-clean-branches`, `repo-sync`, `send-to-ollama`
-- **macos/** — LaunchAgents and Automator workflows
-- **services/** — Finder Quick Actions
-- **vscode/** — settings and recommended extensions
-- **nvim/** — modular Neovim config (native LSP, Treesitter, lazy.nvim)
-- **zen/** — Zen Browser `user.js`, chrome CSS, and theme store exports
+| directory | what's in it |
+|---|---|
+| **`scripts/`** | `clean`, `netinfo`, `git-clean-branches`, `repo-sync`, `send-to-ollama` |
+| **`nvim/`** | modular Neovim config — native LSP, Treesitter, lazy.nvim |
+| **`vscode/`** | settings and 20 recommended extensions |
+| **`zen/`** | Zen Browser `user.js`, chrome CSS, theme store exports |
+| **`macos/`** | a LaunchAgent and an Automator workflow |
+| **`services/`** | Finder Quick Actions |
+
+One thing worth knowing before you start: **only `nvim/` is symlinked.** Everything else is copied into place, so pulling this repo doesn't update your machine — you re-copy after a pull.
 
 ---
 
