@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="280" viewBox="0 0 880 280">
+  <defs>
+    <radialGradient id="node"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#7fb0ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="hub"><stop offset="0%" stop-color="#ffffff"/><stop offset="45%" stop-color="#a9d4ff" stop-opacity="0.6"/><stop offset="100%" stop-color="#3d6ea8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="wash"><stop offset="0%" stop-color="#24406b" stop-opacity="0.42"/><stop offset="100%" stop-color="#070a10" stop-opacity="0"/></radialGradient>
+    <clipPath id="f"><rect width="880" height="280" rx="10"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#f)">
+    <rect width="880" height="280" fill="#070a10"/>
+    <ellipse cx="440" cy="140" rx="420" ry="180" fill="url(#wash)"/>
+
+    <!-- faint far stars -->
+    <g fill="#ffffff" opacity="0.30">
+      <circle cx="72" cy="46" r="1"/><circle cx="196" cy="222" r="0.9"/><circle cx="322" cy="36" r="1.1"/>
+      <circle cx="562" cy="240" r="1"/><circle cx="708" cy="52" r="0.9"/><circle cx="826" cy="196" r="1.1"/>
+      <circle cx="130" cy="140" r="0.8"/><circle cx="760" cy="128" r="0.8"/><circle cx="466" cy="252" r="0.9"/>
+    </g>
+
+    <!-- the constellation: one machine, wired together -->
+    <g stroke="#7fb0ff" stroke-opacity="0.34" stroke-width="1.1" fill="none">
+      <path d="M440 140 L262 84"/>
+      <path d="M440 140 L286 196"/>
+      <path d="M440 140 L612 96"/>
+      <path d="M440 140 L596 202"/>
+      <path d="M440 140 L440 54"/>
+      <path d="M440 140 L452 232"/>
+      <path d="M262 84 L440 54"/>
+      <path d="M612 96 L440 54"/>
+      <path d="M286 196 L452 232"/>
+      <path d="M596 202 L452 232"/>
+      <path d="M262 84 L286 196" stroke-opacity="0.16"/>
+      <path d="M612 96 L596 202" stroke-opacity="0.16"/>
+    </g>
+
+    <!-- outer nodes -->
+    <g>
+      <circle cx="262" cy="84"  r="13" fill="url(#node)" opacity="0.75"/><circle cx="262" cy="84"  r="3.2" fill="#dbe9ff"/>
+      <circle cx="286" cy="196" r="13" fill="url(#node)" opacity="0.75"/><circle cx="286" cy="196" r="3.2" fill="#dbe9ff"/>
+      <circle cx="612" cy="96"  r="13" fill="url(#node)" opacity="0.75"/><circle cx="612" cy="96"  r="3.2" fill="#dbe9ff"/>
+      <circle cx="596" cy="202" r="13" fill="url(#node)" opacity="0.75"/><circle cx="596" cy="202" r="3.2" fill="#dbe9ff"/>
+      <circle cx="440" cy="54"  r="13" fill="url(#node)" opacity="0.75"/><circle cx="440" cy="54"  r="3.2" fill="#dbe9ff"/>
+      <circle cx="452" cy="232" r="13" fill="url(#node)" opacity="0.75"/><circle cx="452" cy="232" r="3.2" fill="#dbe9ff"/>
+    </g>
+
+    <!-- the centre -->
+    <circle cx="440" cy="140" r="34" fill="url(#hub)" opacity="0.9"/>
+    <circle cx="440" cy="140" r="6" fill="#ffffff"/>
+    <circle cx="440" cy="140" r="17" fill="none" stroke="#a9d4ff" stroke-opacity="0.40"/>
+    <circle cx="440" cy="140" r="27" fill="none" stroke="#a9d4ff" stroke-opacity="0.18"/>
+  </g>
+  <rect x="0.5" y="0.5" width="879" height="279" rx="10" fill="none" stroke="#22242b"/>
+</svg>

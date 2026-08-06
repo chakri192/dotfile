@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/constellation.svg" width="840" alt="" />
+
 # dotfiles
 
 **One macOS machine, written down.**
@@ -13,10 +15,6 @@ Shell tools, a Neovim config, editor and browser settings, and the Finder action
   <img alt="Editor" src="https://img.shields.io/badge/VS%20Code-20%20extensions-1c1c1e?style=flat-square&logo=visualstudiocode&logoColor=007ACC" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-1c1c1e?style=flat-square" />
 </p>
-
-<br />
-
-<img src="docs/install-map.svg" width="840" alt="Each directory in the repo and where on the machine it installs to" />
 
 <sub>Tested on an M4 MacBook Air. Take the parts you want — nothing here depends on the rest.</sub>
 
