@@ -261,7 +261,7 @@ Restart Zen — `user.js` values apply on every launch and override `prefs.js`.
 macOS (Apple Silicon) · zsh · VS Code · Zen Browser · tested on M4 MacBook Air
 
 ### AI tooling
-Documentation assisted by local LLMs via [Ollama](https://ollama.com):
+Documentation assisted by [aider](https://github.com/Aider-AI/aider) driving local LLMs via [Ollama](https://ollama.com):
 | model              | used for                              |
 | ------------------ | ------------------------------------- |
 | `qwen2.5-coder:7b` | code suggestions, refactoring         |
