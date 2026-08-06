@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="docs/constellation.svg" width="840" alt="" />
-
 # dotfiles
 
 **Configuration and automation for a single macOS machine.**
