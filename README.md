@@ -22,23 +22,47 @@ Shell utilities, a modular Neovim configuration, editor and browser settings, an
 
 ## Contents
 
-| Directory | Contents | Installs to |
+### Stow packages
+
+Each directory below mirrors its destination relative to `$HOME`, so GNU Stow
+symlinks it into place. Editing the file in the repository and editing it on the
+machine are the same act — these cannot drift.
+
+| Package | Contents | Links into |
 |---|---|---|
-| `scripts/` | Five zsh utilities | `$PATH`, via `~/.zshenv` |
-| `zsh/` | Shell configuration, fzf bindings, secrets template | `~/`, `~/.config/fzf/` |
+| `zsh/` | Shell configuration and fzf bindings | `~/`, `~/.config/fzf/` |
 | `ghostty/` | Terminal configuration | `~/.config/ghostty/` |
 | `starship/` | Prompt — minimal left side, context on the right | `~/.config/` |
 | `atuin/` | SQLite-backed shell history, shared by zsh and nushell | `~/.config/atuin/` |
 | `nushell/` | Structured-data shell, kept alongside zsh | `~/Library/Application Support/nushell/` |
-| `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim` (symlink) |
-| `vscode/` | Settings and 20 recommended extensions | `~/Library/Application Support/Code/User/` |
-| `zen/` | Zen Browser `user.js`, chrome CSS, theme exports | Profile root and `chrome/` |
-| `macos/` | A LaunchAgent and an Automator workflow | `~/Library/LaunchAgents/`, `~/Library/Services/` |
-| `services/` | Finder quick actions | `~/Library/Services/` |
+| `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim/` |
 
-**Only `nvim/` is symlinked.** Every other directory is copied into place, so updating this repository does not update the machine; the relevant files must be copied again after a pull.
+```zsh
+cd ~/Documents/portfolio/dotfile
+stow --no-folding -t ~ zsh ghostty starship atuin nushell nvim
+```
 
-**No credentials are committed.** `zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
+`--no-folding` creates real directories containing symlinked files, rather than
+symlinking whole directories. Files a tool writes for itself — `lazy-lock.json`,
+atuin's databases, nushell's generated init files — then land outside the
+repository instead of silently inside it.
+
+`stow -D -t ~ <package>` removes a package's links; `stow -R -t ~ <package>`
+restows after adding files.
+
+### Not stowed
+
+| Directory | Contents | Why not | Installs to |
+|---|---|---|---|
+| `scripts/` | Five zsh utilities | Already on `$PATH` directly from this repository | `$PATH`, via `~/.zshenv` |
+| `vscode/` | Settings and 20 recommended extensions | VS Code rewrites its own settings file | `~/Library/Application Support/Code/User/` |
+| `zen/` | Zen Browser `user.js`, chrome CSS, theme exports | Profile directory name is a random per-install UUID | Profile root and `chrome/` |
+| `macos/` | A LaunchAgent and an Automator workflow | Install-once bundles that never drift | `~/Library/LaunchAgents/`, `~/Library/Services/` |
+| `services/` | Finder quick actions | Same | `~/Library/Services/` |
+
+These are copied into place, so a pull does not update the machine.
+
+**No credentials are committed.** `zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` (excluded from stow via `zsh/.stow-local-ignore`) to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
 
 The generated shell-integration files under `nushell/` are deliberately absent — regenerate them on a new machine rather than tracking them:
 
@@ -135,9 +159,9 @@ A modular configuration targeting **Neovim 0.11 or later**, built on [lazy.nvim]
 
 | Path | Contents |
 |---|---|
-| `nvim/init.lua` | Leader keys, PATH shim for spawned jobs, module loader |
-| `nvim/lua/config/` | `options`, `keymaps`, `autocmds`, lazy bootstrap |
-| `nvim/lua/plugins/` | One file per concern — LSP, completion, Treesitter, Telescope, git, UI, editor, DAP, linting |
+| `nvim/.config/nvim/init.lua` | Leader keys, PATH shim for spawned jobs, module loader |
+| `nvim/.config/nvim/lua/config/` | `options`, `keymaps`, `autocmds`, lazy bootstrap |
+| `nvim/.config/nvim/lua/plugins/` | One file per concern — LSP, completion, Treesitter, Telescope, git, UI, editor, DAP, linting |
 | `nvim/stylua.toml` · `nvim/ruff.toml` · `nvim/clang-format` | Formatter and linter configuration referenced by conform and ruff |
 
 ### Configuration
@@ -158,7 +182,7 @@ A modular configuration targeting **Neovim 0.11 or later**, built on [lazy.nvim]
 
 ```zsh
 [ -e ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.bak
-ln -s ~/Documents/portfolio/dotfile/nvim ~/.config/nvim
+stow --no-folding -d ~/Documents/portfolio/dotfile -t ~ nvim
 nvim   # lazy.nvim bootstraps and installs plugins on first launch
 ```
 
