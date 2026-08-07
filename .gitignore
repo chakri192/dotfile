@@ -14,3 +14,7 @@ Icon?
 secrets.zsh
 *.secret
 *.key
+
+# Editor backup files
+*.bak
+*.bak.*
