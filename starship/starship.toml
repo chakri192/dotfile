@@ -1,0 +1,82 @@
+# ~/.config/starship.toml
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+command_timeout = 1000
+
+# Split prompt (idea from omerxx/dotfiles): the left side stays tiny so your
+# commands always start at the same column, and every bit of context —
+# git, versions, timings — is pushed to the right edge.
+format = "$directory$character"
+right_format = "$os$git_branch$git_status$python$conda$nodejs$rust$golang$php$cmd_duration"
+
+# Note: styles below deliberately use ANSI names (cyan, purple, green) rather
+# than hardcoded Catppuccin hexes, so the prompt follows Ghostty's light/dark
+# theme switch instead of staying dark-mode-colored on a light background.
+
+[os]
+disabled = false
+format = "[$symbol](#E95420) "
+
+[os.symbols]
+Ubuntu = "󰕈"
+Arch   = "󰣇"
+Macos  = ""
+
+[directory]
+format            = "[$path](cyan) "
+truncation_length = 4
+truncate_to_repo  = true
+
+[git_branch]
+symbol = ""
+format = "[$symbol $branch](bold purple) "
+
+[git_status]
+format     = "($ahead_behind$staged$modified$untracked$deleted$conflicted)"
+ahead      = "[⇡$count ](bold cyan)"
+behind     = "[⇣$count ](bold cyan)"
+diverged   = "[⇡$ahead_count⇣$behind_count ](bold cyan)"
+staged     = "[+$count ](bold green)"
+modified   = "[●$count ](bold yellow)"
+untracked  = "[?$count ](bold white)"
+deleted    = "[✘$count ](bold red)"
+conflicted = "[⚡$count ](bold red)"
+
+[nodejs]
+symbol = ""
+format = "[$symbol $version](green) "
+
+[rust]
+symbol = ""
+format = "[$symbol $version](red) "
+
+[golang]
+symbol = ""
+format = "[$symbol $version](cyan) "
+
+[php]
+symbol = ""
+format = "[$symbol $version](purple) "
+
+# Show active conda env (not base)
+[conda]
+symbol = "🐍 "
+format = "[$symbol$environment](bold yellow) "
+ignore_base = true
+
+# Show python version only inside a venv or when a .py file is nearby
+[python]
+symbol = ""
+format = "[${symbol}${pyenv_prefix}(${version}) (\\($virtualenv\\))](bold yellow) "
+detect_files = [".python-version", "requirements.txt", "pyproject.toml", "setup.py"]
+
+# Dim slow commands (shows how long last command took, if >2s)
+[cmd_duration]
+min_time = 2_000
+format   = "[ $duration](bold yellow) "
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol   = "[❯](red)"
+vimcmd_symbol  = "[❮](blue)"

@@ -1,0 +1,102 @@
+# ~/.config/ghostty/config
+# Ghostty 1.3.1 — macOS
+# Reload after editing: cmd+shift+,
+# Every option, documented:  ghostty +show-config --default --docs
+
+# ─── Font ──────────────────────────────────────────────────────────────────
+# JetBrainsMono Nerd Font Mono — the patched build you already have, so
+# starship / eza / lazygit icons render instead of tofu boxes.
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 14
+font-thicken = true
+
+# Ligatures. calt gives -> and =>; ss02 swaps in the nicer arrow shapes.
+# Delete both lines if you'd rather see the raw characters.
+font-feature = calt
+font-feature = ss02
+
+# A little air between lines. 100% is the font's own metric.
+adjust-cell-height = 12%
+
+# ─── Theme ─────────────────────────────────────────────────────────────────
+# Follows the macOS light/dark setting automatically.
+# Browse alternatives with `ghostty +list-themes`.
+theme = dark:Catppuccin Mocha,light:Catppuccin Latte
+
+# Transparency. Lower = see more of what's behind the window.
+# 1.0 is fully opaque; below about 0.80 text starts fighting the wallpaper.
+background-opacity = 0.88
+
+# Blur softens whatever is behind so text stays readable. Higher = softer.
+# Set to 0 for sharp, unblurred see-through.
+background-blur = 24
+
+# Makes text render at consistent weight over a transparent background
+# instead of thinning out.
+alpha-blending = linear-corrected
+
+# Dim the splits you aren't typing in.
+unfocused-split-opacity = 0.82
+
+# ─── Window ────────────────────────────────────────────────────────────────
+macos-titlebar-style = tabs
+window-padding-x = 14
+window-padding-y = 10,6
+window-padding-balance = true
+window-colorspace = display-p3
+window-save-state = always
+window-inherit-working-directory = true
+
+# For the fully chromeless look omerxx runs — no titlebar, no native tabs:
+# window-decoration = false
+
+# Don't nag when closing a pane with nothing running in it.
+confirm-close-surface = false
+
+# ─── Cursor & mouse ────────────────────────────────────────────────────────
+cursor-style = block
+cursor-style-blink = false
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+clipboard-trim-trailing-spaces = true
+
+# ─── Shell ─────────────────────────────────────────────────────────────────
+# Finds your Homebrew zsh on its own. The features line is the part that
+# matters: cmd+up/down jumps between prompts, new splits inherit the cwd,
+# the cursor shape survives vi-mode, and sudo keeps your TERMINFO.
+shell-integration = detect
+shell-integration-features = cursor,sudo,title
+
+scrollback-limit = 100000000
+
+# Left option sends Esc+ so alt+f / alt+b word motions work in zsh and vim.
+# Right option stays free for typing é, ñ, —. Set to `true` for both.
+macos-option-as-alt = left
+
+# ─── Keybinds ──────────────────────────────────────────────────────────────
+# Splits
+keybind = cmd+d=new_split:right
+keybind = cmd+shift+d=new_split:down
+keybind = cmd+alt+left=goto_split:left
+keybind = cmd+alt+right=goto_split:right
+keybind = cmd+alt+up=goto_split:up
+keybind = cmd+alt+down=goto_split:down
+keybind = cmd+shift+enter=toggle_split_zoom
+keybind = cmd+shift+e=equalize_splits
+
+keybind = cmd+zero=reset_font_size
+
+# Dump the scrollback into $EDITOR — for output that flew past too fast.
+keybind = cmd+shift+j=write_scrollback_file:open
+
+keybind = cmd+k=clear_screen
+
+# Quick terminal: drops down over whatever app you're in. First press asks
+# for Accessibility permission — that's macOS, not Ghostty.
+keybind = global:cmd+grave_accent=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-animation-duration = 0.12
+
+# ─── Misc ──────────────────────────────────────────────────────────────────
+auto-update = check
+resize-overlay = after-first

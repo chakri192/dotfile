@@ -25,6 +25,11 @@ Shell utilities, a modular Neovim configuration, editor and browser settings, an
 | Directory | Contents | Installs to |
 |---|---|---|
 | `scripts/` | Five zsh utilities | `$PATH`, via `~/.zshenv` |
+| `zsh/` | Shell configuration, fzf bindings, secrets template | `~/`, `~/.config/fzf/` |
+| `ghostty/` | Terminal configuration | `~/.config/ghostty/` |
+| `starship/` | Prompt — minimal left side, context on the right | `~/.config/` |
+| `atuin/` | SQLite-backed shell history, shared by zsh and nushell | `~/.config/atuin/` |
+| `nushell/` | Structured-data shell, kept alongside zsh | `~/Library/Application Support/nushell/` |
 | `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim` (symlink) |
 | `vscode/` | Settings and 20 recommended extensions | `~/Library/Application Support/Code/User/` |
 | `zen/` | Zen Browser `user.js`, chrome CSS, theme exports | Profile root and `chrome/` |
@@ -32,6 +37,16 @@ Shell utilities, a modular Neovim configuration, editor and browser settings, an
 | `services/` | Finder quick actions | `~/Library/Services/` |
 
 **Only `nvim/` is symlinked.** Every other directory is copied into place, so updating this repository does not update the machine; the relevant files must be copied again after a pull.
+
+**No credentials are committed.** `zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
+
+The generated shell-integration files under `nushell/` are deliberately absent — regenerate them on a new machine rather than tracking them:
+
+```zsh
+starship init nu      | save -f ($nu.default-config-dir | path join autoload starship.nu)
+zoxide   init nushell | save -f ($nu.default-config-dir | path join zoxide.nu)
+atuin    init nu      | save -f ($nu.default-config-dir | path join atuin.nu)
+```
 
 ---
 

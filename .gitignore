@@ -8,3 +8,9 @@ Icon?
 # Local overrides
 *.local
 *.log
+
+# Secrets — never commit. See zsh/secrets.zsh.example for the template.
+.secrets.zsh
+secrets.zsh
+*.secret
+*.key
