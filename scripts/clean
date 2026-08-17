@@ -6,6 +6,7 @@
 #   clean                  full cleanup (updates + caches + logs + trash + dev junk)
 #   clean -n | --dry-run   show what would be removed, delete nothing
 #   clean --node           also prune node_modules under project dirs (destructive)
+#   clean -q | --quiet     no spinner or colour, one line per step
 #   clean -h | --help      show this help
 #
 # node_modules pruning is opt-in: it wipes deps from active projects too, not
@@ -16,127 +17,254 @@ setopt null_glob
 
 DRY=false
 PRUNE_NODE=false
+QUIET=false
 
 for arg in "$@"; do
   case "$arg" in
     -n|--dry-run) DRY=true ;;
     --node)       PRUNE_NODE=true ;;
-    -h|--help)    sed -n '3,13p' "$0" | sed 's/^#\{0,1\} \{0,1\}//'; exit 0 ;;
+    -q|--quiet)   QUIET=true ;;
+    -h|--help)    sed -n '3,14p' "$0" | sed 's/^#\{0,1\} \{0,1\}//'; exit 0 ;;
     *) print -u2 -r -- "clean: unknown option '$arg' (try --help)"; exit 1 ;;
   esac
 done
 
-$DRY && print -r -- " DRY RUN — nothing will be deleted\n"
+# ── Presentation ───────────────────────────────────────────
+# Colour only when stdout is a terminal and NO_COLOR is unset, so piping
+# `clean` into a file or a pager gives clean plain text.
+if [[ -t 1 && -z "${NO_COLOR:-}" ]] && ! $QUIET; then
+  DIM=$'\e[2m'; BOLD=$'\e[1m'; RESET=$'\e[0m'
+  CYAN=$'\e[36m'; GREEN=$'\e[32m'; YELLOW=$'\e[33m'; GREY=$'\e[90m'
+  FANCY=true
+else
+  DIM=""; BOLD=""; RESET=""; CYAN=""; GREEN=""; YELLOW=""; GREY=""
+  FANCY=false
+fi
 
+COLS=$( [[ -t 1 ]] && tput cols 2>/dev/null || echo 80 )
+(( COLS < 48 )) && COLS=48
+(( COLS > 78 )) && COLS=78
+VALUE_W=18
+LABEL_W=$(( COLS - VALUE_W - 6 ))
+
+rule() {
+  printf '%s' "$GREY"
+  printf '─%.0s' {1..$COLS}
+  printf '%s\n' "$RESET"
+}
+
+banner() {
+  print -r -- ""
+  printf '%s%s  clean%s %s· macOS maintenance%s\n' "$BOLD" "$CYAN" "$RESET" "$GREY" "$RESET"
+  rule
+}
+
+section() { printf '\n%s%s%s\n' "$BOLD" "$1" "$RESET"; }
+
+# ── Space accounting ───────────────────────────────────────
 # Available KB on / — cheap, unlike scanning all of $HOME with du twice.
 avail_kb() { df -k / | awk 'NR==2 {print $4}'; }
-START_AVAIL=$(avail_kb)
 
-# rmrf <paths...> — remove, or just list existing targets in dry-run
+fmt_kb() {
+  local kb=$1
+  (( kb < 0 )) && kb=0
+  if   (( kb >= 1048576 )); then printf '%.1f GB' $(( kb / 1048576.0 ))
+  elif (( kb >= 1024 ));    then printf '%d MB'   $(( kb / 1024 ))
+  elif (( kb > 0 ));        then printf '%d KB'   $kb
+  else                           printf '—'
+  fi
+}
+
+# ── Step runner ────────────────────────────────────────────
+# Each step runs as a background job while a spinner animates, then the
+# line is rewritten in place with a tick and the space that step reclaimed.
+SPINNER=(⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏)
+
+step() {
+  local label="$1"; shift
+  local before after freed
+  before=$(avail_kb)
+
+  if $DRY; then
+    # The listing is the whole point of a dry run, so let it through.
+    printf '  %s·%s %-*s %s%*s%s\n' "$GREY" "$RESET" $LABEL_W "$label" "$GREY" $VALUE_W "would clean" "$RESET"
+    "$@"
+    return 0
+  fi
+
+  if $FANCY; then
+    { "$@" } &>/dev/null &
+    local pid=$! i=1
+    while kill -0 $pid 2>/dev/null; do
+      printf '\r  %s%s%s %-*s' "$CYAN" "${SPINNER[i]}" "$RESET" $LABEL_W "$label"
+      i=$(( i % ${#SPINNER} + 1 ))
+      sleep 0.08
+    done
+    wait $pid 2>/dev/null
+  else
+    "$@" &>/dev/null
+  fi
+
+  after=$(avail_kb)
+  freed=$(( after - before ))
+
+  printf '\r  %s✔%s %-*s %s%*s%s\n' \
+    "$GREEN" "$RESET" $LABEL_W "$label" "$DIM" $VALUE_W "$(fmt_kb $freed)" "$RESET"
+}
+
+note() { printf '  %s·%s %-*s %s%*s%s\n' "$GREY" "$RESET" $LABEL_W "$1" "$GREY" $VALUE_W "$2" "$RESET"; }
+
+# In dry-run the listings are the whole point, so they print above the step
+# line rather than being swallowed by the spinner.
 rmrf() {
   local p
   if $DRY; then
-    for p in "$@"; do [ -e "$p" ] && print -r -- "  would remove: $p"; done
+    for p in "$@"; do [ -e "$p" ] && printf '    %swould remove: %s%s\n' "$GREY" "$p" "$RESET"; done
   else
     rm -rf "$@" 2>/dev/null
   fi
 }
 
-# sweep <dir> <find-test-args...> — delete matches, or list them in dry-run
 sweep() {
   local base="$1"; shift
   [ -d "$base" ] || return 0
   if $DRY; then
-    find "$base" "$@" -print 2>/dev/null | sed 's|^|  would remove: |'
+    find "$base" "$@" -print 2>/dev/null | sed "s|^|    ${GREY}would remove: |;s|\$|${RESET}|"
   else
     find "$base" "$@" -exec rm -rf {} + 2>/dev/null
   fi
 }
 
-# ── Updates ────────────────────────────────────────────────
-if $DRY; then
-  print -r -- " Would update: brew, mas, npm, pip (skipped in dry-run)"
-else
-  if command -v brew &>/dev/null; then
-    echo " Updating Homebrew..."
-    brew update &>/dev/null
-    brew upgrade &>/dev/null
-    brew cleanup -s &>/dev/null
-    brew autoremove &>/dev/null
-  fi
-  # `mas upgrade` was removed in recent mas versions; ignore if unsupported.
-  command -v mas &>/dev/null && mas upgrade &>/dev/null
-  if command -v npm &>/dev/null; then
-    npm install -g npm &>/dev/null
-    npm update -g &>/dev/null
-    npm cache clean --force &>/dev/null
-  fi
-  if command -v pip3 &>/dev/null; then
-    pip3 install --upgrade pip &>/dev/null
-    pip3 cache purge &>/dev/null
-  fi
-fi
-echo ""
+# ── Work units ─────────────────────────────────────────────
+do_brew() {
+  command -v brew &>/dev/null || return 0
+  brew update; brew upgrade; brew cleanup -s; brew autoremove
+}
 
-# ── Logs & Trash ───────────────────────────────────────────
-sweep "$HOME/Library/Logs" -mindepth 1 -maxdepth 1
-sweep "$HOME/Library/DiagnosticReports" -mindepth 1 -maxdepth 1
-rmrf ~/.Trash/*(DN)
+# `mas upgrade` was removed in recent mas versions; ignore if unsupported.
+do_mas() { command -v mas &>/dev/null && mas upgrade; return 0 }
 
-# ── User Caches ────────────────────────────────────────────
-sweep "$HOME/Library/Caches" -mindepth 1 -maxdepth 1 -type d
+do_npm() {
+  command -v npm &>/dev/null || return 0
+  npm install -g npm; npm update -g; npm cache clean --force
+}
 
-# ── VS Code ────────────────────────────────────────────────
-for sub in Cache CachedData CachedExtensionVSIXs; do
-  sweep "$HOME/Library/Application Support/Code/$sub" -mindepth 1 -maxdepth 1
-done
+do_pip() {
+  command -v pip3 &>/dev/null || return 0
+  pip3 install --upgrade pip; pip3 cache purge
+}
 
-# ── Zen Browser ────────────────────────────────────────────
-sweep "$HOME/Library/Application Support/zen/Profiles" -name cache2 -type d -prune
-sweep "$HOME/Library/Application Support/zen/Profiles" -name startupCache -type d -prune
-sweep "$HOME/Library/Caches/Zen" -mindepth 1 -maxdepth 1
+do_logs() {
+  sweep "$HOME/Library/Logs" -mindepth 1 -maxdepth 1
+  sweep "$HOME/Library/DiagnosticReports" -mindepth 1 -maxdepth 1
+}
 
-# ── Xcode ──────────────────────────────────────────────────
-rmrf "$HOME/Library/Developer/Xcode/DerivedData" \
-     "$HOME/Library/Developer/Xcode/Archives" \
-     "$HOME/Library/Developer/CoreSimulator/Caches"
+do_trash()  { rmrf ~/.Trash/*(DN) }
+do_caches() { sweep "$HOME/Library/Caches" -mindepth 1 -maxdepth 1 -type d }
 
-# ── Python & C junk ────────────────────────────────────────
-for dir in "$HOME/Documents" "$HOME/Desktop" "$HOME/Downloads" "$HOME/Projects" "$HOME/dev"; do
-  sweep "$dir" -name __pycache__ -type d -prune
-  sweep "$dir" -name "*.pyc" -type f
-  sweep "$dir" -name a.out -type f
-  sweep "$dir" -name "*.o" -type f
-  sweep "$dir" -name .DS_Store -type f
-done
+do_vscode() {
+  local sub
+  for sub in Cache CachedData CachedExtensionVSIXs; do
+    sweep "$HOME/Library/Application Support/Code/$sub" -mindepth 1 -maxdepth 1
+  done
+}
 
-# ── node_modules (opt-in via --node) ───────────────────────
-if $PRUNE_NODE; then
+do_zen() {
+  sweep "$HOME/Library/Application Support/zen/Profiles" -name cache2 -type d -prune
+  sweep "$HOME/Library/Application Support/zen/Profiles" -name startupCache -type d -prune
+  sweep "$HOME/Library/Caches/Zen" -mindepth 1 -maxdepth 1
+}
+
+do_xcode() {
+  rmrf "$HOME/Library/Developer/Xcode/DerivedData" \
+       "$HOME/Library/Developer/Xcode/Archives" \
+       "$HOME/Library/Developer/CoreSimulator/Caches"
+}
+
+do_devjunk() {
+  local dir
+  for dir in "$HOME/Documents" "$HOME/Desktop" "$HOME/Downloads" "$HOME/Projects" "$HOME/dev"; do
+    sweep "$dir" -name __pycache__ -type d -prune
+    sweep "$dir" -name "*.pyc" -type f
+    sweep "$dir" -name a.out -type f
+    sweep "$dir" -name "*.o" -type f
+    sweep "$dir" -name .DS_Store -type f
+  done
+}
+
+do_node() {
+  local dir
   for dir in "$HOME/Projects" "$HOME/dev" "$HOME/Documents"; do
     sweep "$dir" -name node_modules -type d -prune
   done
-else
-  echo " Skipping node_modules (pass --node to prune them)"
-fi
+}
 
-# ── System maintenance + DNS flush ─────────────────────────
-if $DRY; then
-  print -r -- " Would run: sudo periodic daily weekly monthly; flush DNS cache"
-else
+do_system() {
   sudo periodic daily weekly monthly 2>/dev/null
   sudo dscacheutil -flushcache 2>/dev/null
   sudo killall -HUP mDNSResponder 2>/dev/null
+  return 0
+}
+
+# ── Run ────────────────────────────────────────────────────
+banner
+$DRY && printf '  %sdry run — nothing will be deleted%s\n' "$YELLOW" "$RESET"
+
+START_AVAIL=$(avail_kb)
+
+section "Packages"
+if $DRY; then
+  note "Homebrew" "skipped in dry-run"
+  note "Mac App Store" "skipped in dry-run"
+  note "npm" "skipped in dry-run"
+  note "pip" "skipped in dry-run"
+else
+  step "Homebrew"      do_brew
+  step "Mac App Store" do_mas
+  step "npm"           do_npm
+  step "pip"           do_pip
+fi
+
+section "System"
+step "Logs & diagnostics" do_logs
+step "Trash"              do_trash
+step "User caches"        do_caches
+
+section "Applications"
+step "VS Code"     do_vscode
+step "Zen Browser" do_zen
+step "Xcode"       do_xcode
+
+section "Development"
+step "Build & Python junk" do_devjunk
+if $PRUNE_NODE; then
+  step "node_modules" do_node
+else
+  note "node_modules" "pass --node"
+fi
+
+section "Maintenance"
+if $DRY; then
+  note "periodic + DNS flush" "skipped in dry-run"
+else
+  # Prompt for the password in the foreground; a sudo prompt hidden behind
+  # the spinner would look like a hang.
+  sudo -v 2>/dev/null
+  step "periodic + DNS flush" do_system
 fi
 
 # ── Summary ────────────────────────────────────────────────
-END_AVAIL=$(avail_kb)
-FREED_MB=$(( (END_AVAIL - START_AVAIL) / 1024 ))
-(( FREED_MB < 0 )) && FREED_MB=0
+FREED_KB=$(( $(avail_kb) - START_AVAIL ))
+(( FREED_KB < 0 )) && FREED_KB=0
 
-echo ""
+print -r -- ""
+rule
 if $DRY; then
-  echo "   (dry run — no space actually freed)"
+  printf '  %sdry run%s — no space freed · %s%s free%s\n' \
+    "$YELLOW" "$RESET" "$BOLD" "$(df -h / | awk 'NR==2 {print $4}')" "$RESET"
 else
-  echo "   Freed:      ${FREED_MB}MB"
+  printf '  freed %s%s%s · %s%s free%s\n' \
+    "$BOLD$GREEN" "$(fmt_kb $FREED_KB)" "$RESET" \
+    "$BOLD" "$(df -h / | awk 'NR==2 {print $4}')" "$RESET"
 fi
-echo "   Free space: $(df -h / | awk 'NR==2 {print $4}') available"
+print -r -- ""
