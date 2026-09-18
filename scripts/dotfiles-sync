@@ -1,0 +1,113 @@
+#!/usr/bin/env zsh
+#
+# dotfiles-sync
+#
+# Most packages in this repo are stow symlinks, so editing the live file and
+# editing the repo are already the same act — nothing to sync. This script
+# covers the ones that aren't: the "Not stowed" packages in the README
+# (vscode/, zen/) are copied into place, so the machine can drift from the
+# repo on its own — VS Code rewrites its own settings.json, Zen exports new
+# themes, etc.
+#
+# Not covered: zsh/.config/zsh/ is a one-time migration case (see README's
+# ZDOTDIR note), not an ongoing drift source — once you've restowed it,
+# ~/.config/zsh is a real symlink into this repo and there's nothing to sync.
+#
+# For each pair below: if the live file exists, isn't already a symlink into
+# this repo, and differs from the repo's copy, it's copied over. Changed
+# files are then committed and, with -y, pushed.
+#
+# Usage:
+#   dotfiles-sync              # preview: show what would change, no writes
+#   dotfiles-sync -y           # copy changes in, commit, and push
+#   dotfiles-sync -y --no-push # copy changes in and commit, but don't push
+
+set -u
+
+REPO="$(cd "$(dirname "${0}")/.." && pwd)"
+APPLY=false
+PUSH=true
+
+for arg in "$@"; do
+  case "$arg" in
+    -y) APPLY=true ;;
+    --no-push) PUSH=false ;;
+    *) ;;
+  esac
+done
+
+# repo-relative path : live path
+PAIRS=(
+  "vscode/settings.json:$HOME/Library/Application Support/Code/User/settings.json"
+  "zen/user.js:$HOME/Library/Application Support/zen/Profiles/vbdk7g0g.Default (release)/user.js"
+  "zen/userChrome.css:$HOME/Library/Application Support/zen/Profiles/vbdk7g0g.Default (release)/chrome/userChrome.css"
+  "zen/userContent.css:$HOME/Library/Application Support/zen/Profiles/vbdk7g0g.Default (release)/chrome/userContent.css"
+  "zen/zen-themes.css:$HOME/Library/Application Support/zen/Profiles/vbdk7g0g.Default (release)/chrome/zen-themes.css"
+)
+
+echo "Scanning live files against $REPO"
+if $APPLY; then
+  echo "Mode: APPLY (changes will be copied in and committed)"
+else
+  echo "Mode: PREVIEW (pass -y to copy changes in and commit)"
+fi
+echo ""
+
+changed=()
+
+for pair in "${PAIRS[@]}"; do
+  repo_rel="${pair%%:*}"
+  live="${pair#*:}"
+  repo_path="$REPO/$repo_rel"
+
+  [[ -e "$live" ]] || continue
+
+  # Already a symlink into this repo (post-restow) — nothing to sync.
+  if [[ -L "$live" ]]; then
+    resolved="$(readlink -f "$live" 2>/dev/null || realpath "$live" 2>/dev/null)"
+    [[ "$resolved" == "$repo_path" ]] && continue
+  fi
+
+  if [[ ! -e "$repo_path" ]] || ! diff -q "$live" "$repo_path" >/dev/null 2>&1; then
+    echo "=== $repo_rel ==="
+    diff -u "$repo_path" "$live" 2>/dev/null | head -20
+    changed+=("$repo_rel:$live")
+  fi
+done
+
+if (( ${#changed[@]} == 0 )); then
+  echo "Nothing to sync — repo already matches the live machine."
+  exit 0
+fi
+
+echo ""
+echo "${#changed[@]} file(s) differ from the repo."
+
+if ! $APPLY; then
+  echo "Preview only — pass -y to copy these in and commit."
+  exit 0
+fi
+
+for entry in "${changed[@]}"; do
+  repo_rel="${entry%%:*}"
+  live="${entry#*:}"
+  mkdir -p "$(dirname "$REPO/$repo_rel")"
+  cp "$live" "$REPO/$repo_rel"
+  echo "  synced $repo_rel"
+done
+
+cd "$REPO" || exit 1
+
+if git diff --quiet && git diff --cached --quiet; then
+  echo "Files copied, but nothing new for git to commit."
+  exit 0
+fi
+
+git add -- "${changed[@]%%:*}"
+git commit -m "sync: update from live machine state ($(date '+%Y-%m-%d %H:%M'))"
+
+if $PUSH; then
+  git push
+else
+  echo "Committed locally — not pushed (--no-push)."
+fi
