@@ -19,30 +19,29 @@ font-feature = ss02
 adjust-cell-height = 12%
 
 # ─── Theme ─────────────────────────────────────────────────────────────────
-# Custom grayscale palette — no built-in Ghostty theme is pure monochrome,
-# so this hand-rolls one. Note: this also flattens ANSI red/green/yellow,
-# so git diff coloring, test pass/fail, and lint output lose their color
-# coding and fall back to relative brightness only.
-background = 0d0d0d
+# Custom vivid-on-black palette — near-black background with a full-color
+# ANSI 16 (One Dark-style), so git diff coloring, test pass/fail, and lint
+# output keep their color coding instead of falling back to grayscale.
+background = 000000
 foreground = e0e0e0
 cursor-color = ffffff
-selection-background = 4a4a4a
+selection-background = 3a3a3a
 selection-foreground = ffffff
 palette = 0=#000000
-palette = 1=#5c5c5c
-palette = 2=#6e6e6e
-palette = 3=#808080
-palette = 4=#929292
-palette = 5=#a4a4a4
-palette = 6=#b6b6b6
-palette = 7=#c8c8c8
-palette = 8=#4a4a4a
-palette = 9=#7a7a7a
-palette = 10=#8c8c8c
-palette = 11=#9e9e9e
-palette = 12=#b0b0b0
-palette = 13=#c2c2c2
-palette = 14=#d4d4d4
+palette = 1=#e06c75
+palette = 2=#98c379
+palette = 3=#e5c07b
+palette = 4=#61afef
+palette = 5=#c678dd
+palette = 6=#56b6c2
+palette = 7=#abb2bf
+palette = 8=#5c6370
+palette = 9=#ff7b86
+palette = 10=#b5e08c
+palette = 11=#f0d090
+palette = 12=#7cc4ff
+palette = 13=#dd9bef
+palette = 14=#6fd6e6
 palette = 15=#ffffff
 
 # Transparency. Lower = see more of what's behind the window.
