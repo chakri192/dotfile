@@ -1,0 +1,143 @@
+#!/usr/bin/env zsh
+#
+# doctor
+#
+# Health check for this dotfiles repo on the current machine. Written after
+# zsh/.zshrc and zsh/.zprofile sat completely dead for months — ZDOTDIR
+# redirected zsh elsewhere and nothing ever noticed. This is the check that
+# would have caught it immediately instead.
+#
+# Checks: every stow package's symlinks actually resolve into this repo
+# (not missing, not a real file/dir shadowing it, not dangling), every
+# Brewfile dependency is installed, ~/.secrets.zsh exists with safe
+# permissions, and ZDOTDIR resolves where zsh/.zshenv says it should.
+#
+# Usage:
+#   doctor        # run all checks, exit 1 if anything's wrong
+
+set -u
+
+REPO="$(cd "$(dirname "${0}")/.." && pwd)"
+problems=0
+
+note()  { echo "  $1" }
+ok()    { echo "  OK: $1" }
+warn()  { echo "  WARN: $1" }
+bad()   { echo "  FAIL: $1"; problems=$((problems + 1)) }
+
+echo "=== Stow packages ==="
+# Keep this list in sync with install.sh's stow line.
+for pkg in zsh ghostty atuin nushell nvim git tmux ssh; do
+  pkg_dir="$REPO/$pkg"
+  if [[ ! -d "$pkg_dir" ]]; then
+    note "$pkg: not a package in this repo yet — skipping"
+    continue
+  fi
+
+  # Stow's own default ignore list plus whatever the package's
+  # .stow-local-ignore adds (see README's secrets.zsh.example note).
+  ignore_patterns=('\.stow-local-ignore$' '\.git$' '\.gitignore$')
+  if [[ -f "$pkg_dir/.stow-local-ignore" ]]; then
+    while IFS= read -r pattern; do
+      [[ -n "$pattern" ]] && ignore_patterns+=("$pattern")
+    done < "$pkg_dir/.stow-local-ignore"
+  fi
+
+  pkg_problem=0
+  while IFS= read -r -d '' repo_file; do
+    rel="${repo_file#"$pkg_dir"/}"
+    base="$(basename "$repo_file")"
+
+    ignored=0
+    for pattern in "${ignore_patterns[@]}"; do
+      [[ "$base" =~ $pattern ]] && { ignored=1; break }
+    done
+    (( ignored )) && continue
+
+    live="$HOME/$rel"
+
+    if [[ ! -e "$live" && ! -L "$live" ]]; then
+      bad "$pkg: $rel — missing at ~/$rel"
+      pkg_problem=1
+    elif [[ -L "$live" ]]; then
+      resolved="$(readlink -f "$live" 2>/dev/null || realpath "$live" 2>/dev/null)"
+      if [[ "$resolved" != "$repo_file" ]]; then
+        if [[ ! -e "$live" ]]; then
+          bad "$pkg: $rel — dangling symlink at ~/$rel"
+        else
+          bad "$pkg: $rel — symlinked to something else: $resolved"
+        fi
+        pkg_problem=1
+      fi
+    else
+      bad "$pkg: $rel — real file/dir at ~/$rel, not a symlink (stow -n --no-folding -t ~ $pkg to check)"
+      pkg_problem=1
+    fi
+  done < <(find "$pkg_dir" -type f -print0)
+
+  (( pkg_problem == 0 )) && ok "$pkg — all symlinks resolve into this repo"
+done
+
+echo ""
+echo "=== Brewfile coverage ==="
+if ! command -v brew >/dev/null 2>&1; then
+  note "brew not installed — skipping"
+elif [[ ! -f "$REPO/Brewfile" ]]; then
+  note "no Brewfile — skipping"
+else
+  missing=0
+  while IFS= read -r name; do
+    brew list --formula --versions "$name" >/dev/null 2>&1 || { bad "brew formula not installed: $name"; missing=1; }
+  done < <(grep -o '^brew "[^"]*"' "$REPO/Brewfile" | sed 's/^brew "//;s/"$//')
+
+  while IFS= read -r name; do
+    brew list --cask --versions "$name" >/dev/null 2>&1 || { bad "cask not installed: $name"; missing=1; }
+  done < <(grep -o '^cask "[^"]*"' "$REPO/Brewfile" | sed 's/^cask "//;s/"$//')
+
+  (( missing == 0 )) && ok "everything in Brewfile is installed"
+fi
+
+echo ""
+echo "=== Secrets ==="
+if [[ ! -e "$HOME/.secrets.zsh" ]]; then
+  note "~/.secrets.zsh not present — fine, zsh starts cleanly without it"
+else
+  perms=$(stat -f '%Lp' "$HOME/.secrets.zsh" 2>/dev/null || stat -c '%a' "$HOME/.secrets.zsh" 2>/dev/null)
+  if [[ "$perms" == "600" ]]; then
+    ok "~/.secrets.zsh exists, permissions 600"
+  else
+    warn "~/.secrets.zsh permissions are $perms, not 600 — chmod 600 ~/.secrets.zsh"
+  fi
+fi
+
+echo ""
+echo "=== ZDOTDIR resolution ==="
+if [[ ! -L "$HOME/.zshenv" ]]; then
+  bad "~/.zshenv is not a symlink"
+else
+  zshenv_target="$(readlink -f "$HOME/.zshenv" 2>/dev/null || realpath "$HOME/.zshenv" 2>/dev/null)"
+  if [[ "$zshenv_target" != "$REPO/zsh/.zshenv" ]]; then
+    bad "~/.zshenv doesn't resolve into this repo (got $zshenv_target)"
+  else
+    live_zdotdir="$(/bin/zsh -i -c 'echo $ZDOTDIR' 2>/dev/null | tail -1)"
+    live_zshrc="$live_zdotdir/.zshrc"
+    if [[ -L "$live_zshrc" ]]; then
+      resolved="$(readlink -f "$live_zshrc" 2>/dev/null || realpath "$live_zshrc" 2>/dev/null)"
+      if [[ "$resolved" == "$REPO/zsh/.config/zsh/.zshrc" ]]; then
+        ok "ZDOTDIR=$live_zdotdir, .zshrc resolves into this repo"
+      else
+        bad "ZDOTDIR's .zshrc resolves somewhere else: $resolved"
+      fi
+    else
+      bad "ZDOTDIR is set to $live_zdotdir, but $live_zshrc isn't a symlink — this is exactly the bug that started all this"
+    fi
+  fi
+fi
+
+echo ""
+if (( problems == 0 )); then
+  echo "All checks passed."
+else
+  echo "$problems problem(s) found."
+  exit 1
+fi
