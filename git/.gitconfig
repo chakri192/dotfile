@@ -1,0 +1,117 @@
+[user]
+	name = V Chakradhar
+	email = chakradharv08@gmail.com
+
+[core]
+	excludesfile = ~/.gitignore_global
+	commentChar = "#"
+	autocrlf = input
+	whitespace = trailing-space,space-before-tab
+	# Use delta for all diffs
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true        # n/N to jump between diff sections
+	line-numbers = true
+	side-by-side = false   # set to true if you prefer split view
+	syntax-theme = Catppuccin-mocha
+	file-style = bold yellow
+	file-decoration-style = none
+	hunk-header-style = file line-number
+	hunk-header-decoration-style = blue box
+	minus-style = syntax "#3d1e1e"
+	plus-style = syntax "#1e3d1e"
+
+[merge]
+	conflictstyle = diff3
+	tool = sourcetree
+	# Automatically stash before rebase/merge and unstash after
+	autostash = true
+
+[rebase]
+	autostash = true
+	autosquash = true
+
+[rerere]
+	# Remember how you resolved conflicts and auto-apply next time
+	enabled = true
+
+[pull]
+	rebase = true
+
+[push]
+	default = current
+	autoSetupRemote = true
+
+[fetch]
+	prune = true           # auto-remove deleted remote branches
+
+[diff]
+	tool = sourcetree
+	colorMoved = default
+
+[difftool "sourcetree"]
+	cmd = opendiff "$LOCAL" "$REMOTE"
+	path =
+
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh "$LOCAL" "$REMOTE" -ancestor "$BASE" -merge "$MERGED"
+	trustExitCode = true
+
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+
+[alias]
+	# Status & info
+	s        = status -sb
+	l        = log --oneline --graph --decorate -20
+	la       = log --oneline --graph --decorate --all
+	ll       = log --stat --decorate -10
+	who      = shortlog -sn --no-merges
+
+	# Staging
+	a        = add
+	aa       = add --all
+	ap       = add --patch            # interactive hunk staging
+
+	# Committing
+	c        = commit -m
+	ca       = commit --amend --no-edit
+	cam      = commit --amend
+
+	# Branching
+	b        = branch
+	ba       = branch -a
+	bd       = branch -d
+	bD       = branch -D
+	sw       = switch
+	swc      = switch -c             # create + switch
+
+	# Remotes
+	f        = fetch --all --prune
+	p        = push
+	pf       = push --force-with-lease
+	pl       = pull
+
+	# Stash
+	ss       = stash push -m
+	sl       = stash list
+	sp       = stash pop
+	sd       = stash drop
+
+	# Undo
+	unstage  = reset HEAD --
+	undo     = reset --soft HEAD~1    # undo last commit, keep changes staged
+	nuke     = reset --hard HEAD~1    # undo last commit, discard changes
+
+	# Cleanup
+	cleanup  = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xargs -n 1 git branch -d"
+
+	# Open repo in browser (gh)
+	open     = "!gh repo view --web"
