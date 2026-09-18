@@ -1,0 +1,77 @@
+#!/usr/bin/env zsh
+#
+# macos-defaults
+#
+# System settings as code, instead of forty manual clicks through System
+# Settings on a new machine — and rerunnable, since a macOS upgrade
+# periodically resets some of these back to Apple's defaults.
+#
+# Nothing here touches security posture (no Gatekeeper/firewall/SIP
+# toggles) and nothing needs sudo.
+#
+# Usage:
+#   macos-defaults              # apply
+#   macos-defaults --dry-run    # print the defaults commands without running them
+
+set -u
+
+DRY_RUN=false
+[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
+
+run() {
+  if $DRY_RUN; then
+    echo "+ $*"
+  else
+    "$@"
+  fi
+}
+
+echo "Mode: $($DRY_RUN && echo 'DRY RUN — nothing will change' || echo 'APPLY')"
+echo ""
+
+echo "=== Finder ==="
+run defaults write com.apple.finder AppleShowAllFiles -bool true
+run defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+run defaults write com.apple.finder ShowPathbar -bool true
+run defaults write com.apple.finder ShowStatusBar -bool true
+run defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+run defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"  # list view by default
+run defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"  # search current folder by default
+
+echo ""
+echo "=== Dock ==="
+run defaults write com.apple.dock autohide -bool true
+run defaults write com.apple.dock autohide-delay -float 0
+run defaults write com.apple.dock autohide-time-modifier -float 0.3
+run defaults write com.apple.dock show-recents -bool false
+run defaults write com.apple.dock tilesize -int 42
+
+echo ""
+echo "=== Keyboard ==="
+run defaults write NSGlobalDomain KeyRepeat -int 2
+run defaults write NSGlobalDomain InitialKeyRepeat -int 15
+# Press-and-hold shows an accent popup instead of repeating the key —
+# gets in the way of vim's hjkl and any held-key repeat.
+run defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+
+echo ""
+echo "=== Trackpad ==="
+run defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+run defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+
+echo ""
+echo "=== Screenshots ==="
+run mkdir -p "$HOME/Pictures/Screenshots"
+run defaults write com.apple.screencapture location -string "$HOME/Pictures/Screenshots"
+run defaults write com.apple.screencapture type -string "png"
+
+if ! $DRY_RUN; then
+  echo ""
+  echo "=== Restarting affected apps ==="
+  run killall Finder
+  run killall Dock
+  run killall SystemUIServer
+fi
+
+echo ""
+echo "Done."
