@@ -18,6 +18,7 @@ brew "eza"
 brew "bat"
 brew "fd"
 brew "ripgrep"
+brew "tmux"
 brew "jq"          # used by install.sh to read vscode/extensions.json
 brew "mas"          # used by scripts/clean
 
