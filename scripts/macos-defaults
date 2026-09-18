@@ -47,14 +47,6 @@ run defaults write com.apple.dock show-recents -bool false
 run defaults write com.apple.dock tilesize -int 42
 
 echo ""
-echo "=== Keyboard ==="
-run defaults write NSGlobalDomain KeyRepeat -int 2
-run defaults write NSGlobalDomain InitialKeyRepeat -int 15
-# Press-and-hold shows an accent popup instead of repeating the key —
-# gets in the way of vim's hjkl and any held-key repeat.
-run defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
-
-echo ""
 echo "=== Trackpad ==="
 run defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 run defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1

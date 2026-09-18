@@ -100,7 +100,7 @@ atuin    init nu      | save -f ($nu.default-config-dir | path join atuin.nu)
 | `send-to-ollama` | Summarises a file through a local Ollama model, writing `<name>-summary.md` alongside the original |
 | `dotfiles-sync` | Diffs the live `vscode/` and `zen/` files (the "Not stowed" packages above) against this repo. `-y` copies changes in, commits, and pushes; `--no-push` commits without pushing. Defaults to preview mode |
 | `doctor` | Checks every stow package's symlinks actually resolve into this repo (missing, dangling, or shadowed by a real file are each flagged separately), every `Brewfile` dependency is installed, `~/.secrets.zsh` permissions, and that `ZDOTDIR` resolves where `zsh/.zshenv` says it should. Exits 1 if anything's wrong |
-| `macos-defaults` | Finder, Dock, keyboard, trackpad, and screenshot settings as code instead of manual System Settings clicks — rerunnable after a macOS upgrade resets them. `--dry-run` previews without applying |
+| `macos-defaults` | Finder, Dock, trackpad, and screenshot settings as code instead of manual System Settings clicks — rerunnable after a macOS upgrade resets them. `--dry-run` previews without applying |
 
 ### Installation
 
