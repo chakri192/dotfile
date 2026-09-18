@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # shellcheck only understands sh/bash/dash/ksh (SC1071) — most scripts/
+      # here are zsh, so only the bash one can actually be checked.
+      - name: shellcheck scripts/git-clean-branches
+        run: shellcheck scripts/git-clean-branches
+
+  stylua:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check nvim/.config/nvim
+
+  stow-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install stow
+        run: sudo apt-get update && sudo apt-get install -y stow
+      - name: stow --no (conflict check only, nothing is linked)
+        run: |
+          mkdir -p /tmp/stow-home
+          stow -n -v --no-folding -t /tmp/stow-home -d "$GITHUB_WORKSPACE" \
+            zsh ghostty atuin nushell nvim git

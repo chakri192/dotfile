@@ -52,8 +52,6 @@ else
 fi
 echo ""
 
-total_deleted=0
-
 for dir in "$ROOT"/*/; do
   [ -d "$dir/.git" ] || continue
 
