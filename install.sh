@@ -38,7 +38,11 @@ fi
 
 echo "==> Stow packages"
 if command -v stow >/dev/null 2>&1; then
-  run stow --no-folding -t "$HOME" zsh ghostty atuin nushell nvim git
+  run mkdir -p "$HOME/.ssh"
+  run chmod 700 "$HOME/.ssh"
+  run mkdir -p "$HOME/.ssh/sockets"
+  run chmod 700 "$HOME/.ssh/sockets"
+  run stow --no-folding -t "$HOME" zsh ghostty atuin nushell nvim git tmux ssh
 else
   echo "    ERROR: GNU Stow not found. Install it (brew install stow) and re-run." >&2
   exit 1
@@ -76,7 +80,11 @@ cat <<'EOF'
 Done. Remaining manual steps (see README.md):
   - Zen Browser: locate the profile (about:support) and copy zen/* in by hand.
   - Secrets: cp zsh/secrets.zsh.example ~/.secrets.zsh && chmod 600 ~/.secrets.zsh
+  - SSH hosts: cp ssh/.ssh/config.local.example ~/.ssh/config.local, fill in real hosts.
   - Neovim: launch `nvim` once to let lazy.nvim bootstrap, then :MasonInstall
     the formatter/linter/debugger binaries listed in the README.
   - nushell: regenerate the starship/zoxide/atuin init files (README has the commands).
+  - macOS system settings: scripts/macos-defaults --dry-run, then run for real
+    if the output looks right.
+  - Run scripts/doctor to confirm everything above actually took.
 EOF

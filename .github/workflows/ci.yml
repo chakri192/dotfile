@@ -34,4 +34,4 @@ jobs:
         run: |
           mkdir -p /tmp/stow-home
           stow -n -v --no-folding -t /tmp/stow-home -d "$GITHUB_WORKSPACE" \
-            zsh ghostty atuin nushell nvim git
+            zsh ghostty atuin nushell nvim git tmux ssh

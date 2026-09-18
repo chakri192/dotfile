@@ -8,7 +8,7 @@ Shell utilities, a modular Neovim configuration, editor and browser settings, an
 
 <p>
   <img alt="Platform" src="https://img.shields.io/badge/macOS-Apple%20Silicon-1c1c1e?style=flat-square&logo=apple&logoColor=white" />
-  <img alt="Shell" src="https://img.shields.io/badge/zsh-6%20tools-1c1c1e?style=flat-square&logo=gnubash&logoColor=4EAA25" />
+  <img alt="Shell" src="https://img.shields.io/badge/zsh-8%20tools-1c1c1e?style=flat-square&logo=gnubash&logoColor=4EAA25" />
   <img alt="Neovim" src="https://img.shields.io/badge/Neovim-0.11%2B-1c1c1e?style=flat-square&logo=neovim&logoColor=57A143" />
   <img alt="Editor" src="https://img.shields.io/badge/VS%20Code-20%20extensions-1c1c1e?style=flat-square&logo=visualstudiocode&logoColor=007ACC" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-1c1c1e?style=flat-square" />
@@ -36,10 +36,12 @@ machine are the same act — these cannot drift.
 | `nushell/` | Structured-data shell, kept alongside zsh | `~/Library/Application Support/nushell/` |
 | `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim/` |
 | `git/` | `.gitconfig` (delta, rerere, autostash, aliases) and a global `.gitignore` | `~/` |
+| `tmux/` | XDG-path config — vi copy mode, true color, hand-rolled status line | `~/.config/tmux/` |
+| `ssh/` | Sane `Host *` defaults (agent, keychain, connection reuse); real hosts live in a gitignored `config.local` | `~/.ssh/` |
 
 ```zsh
 cd ~/Documents/portfolio/dotfile
-stow --no-folding -t ~ zsh ghostty atuin nushell nvim git
+stow --no-folding -t ~ zsh ghostty atuin nushell nvim git tmux ssh
 ```
 
 `zsh/.zshenv` redirects `ZDOTDIR` to `~/.config/zsh`, so zsh reads `.zshrc`
@@ -72,6 +74,11 @@ copies, and with `-y` copies the changes in, commits, and pushes.
 
 **No credentials are committed.** `zsh/.config/zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` (excluded from stow via `zsh/.stow-local-ignore`) to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
 
+Real SSH hosts follow the same pattern: `ssh/.ssh/config` `Include`s a
+`~/.ssh/config.local` that's never committed (covered by the repo's `*.local`
+`.gitignore` glob). Copy `ssh/.ssh/config.local.example` to `~/.ssh/config.local`
+and add real `Host` blocks there.
+
 The generated shell-integration files under `nushell/` are deliberately absent — regenerate them on a new machine rather than tracking them:
 
 ```zsh
@@ -92,6 +99,8 @@ atuin    init nu      | save -f ($nu.default-config-dir | path join atuin.nu)
 | `repo-sync` | Scans one level deep for repositories under a base directory and fast-forward pulls those behind their upstream. Repositories that are ahead, diverged, or without an upstream are reported and skipped |
 | `send-to-ollama` | Summarises a file through a local Ollama model, writing `<name>-summary.md` alongside the original |
 | `dotfiles-sync` | Diffs the live `vscode/` and `zen/` files (the "Not stowed" packages above) against this repo. `-y` copies changes in, commits, and pushes; `--no-push` commits without pushing. Defaults to preview mode |
+| `doctor` | Checks every stow package's symlinks actually resolve into this repo (missing, dangling, or shadowed by a real file are each flagged separately), every `Brewfile` dependency is installed, `~/.secrets.zsh` permissions, and that `ZDOTDIR` resolves where `zsh/.zshenv` says it should. Exits 1 if anything's wrong |
+| `macos-defaults` | Finder, Dock, keyboard, trackpad, and screenshot settings as code instead of manual System Settings clicks — rerunnable after a macOS upgrade resets them. `--dry-run` previews without applying |
 
 ### Installation
 
@@ -120,11 +129,14 @@ git-clean-branches ~/dev -y     # delete them
 repo-sync                       # fast-forward pull repositories under the base directory
 dotfiles-sync                   # preview drift between vscode/zen and the live machine
 dotfiles-sync -y                # pull that drift into the repo, commit, and push
+doctor                           # health check — stow symlinks, Brewfile, secrets, ZDOTDIR
+macos-defaults --dry-run         # preview system settings changes
+macos-defaults                   # apply them
 ```
 
 ### Dependencies
 
-`zsh` is required. `curl` is used by `netinfo` for public IP lookup. Homebrew, `mas`, `npm`, and `pip3` are each optional and skipped by `clean` when absent. `clean` requires `sudo` for periodic maintenance and DNS flushing.
+`zsh` is required. `curl` is used by `netinfo` for public IP lookup. `tmux` is used by nothing in `scripts/` directly but is required for the `tmux/` package. Homebrew, `mas`, `npm`, and `pip3` are each optional and skipped by `clean` when absent. `clean` requires `sudo` for periodic maintenance and DNS flushing. `doctor` needs `brew` to check `Brewfile` coverage — skipped with a note if absent.
 
 ---
 
