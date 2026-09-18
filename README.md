@@ -8,7 +8,7 @@ Shell utilities, a modular Neovim configuration, editor and browser settings, an
 
 <p>
   <img alt="Platform" src="https://img.shields.io/badge/macOS-Apple%20Silicon-1c1c1e?style=flat-square&logo=apple&logoColor=white" />
-  <img alt="Shell" src="https://img.shields.io/badge/zsh-5%20tools-1c1c1e?style=flat-square&logo=gnubash&logoColor=4EAA25" />
+  <img alt="Shell" src="https://img.shields.io/badge/zsh-6%20tools-1c1c1e?style=flat-square&logo=gnubash&logoColor=4EAA25" />
   <img alt="Neovim" src="https://img.shields.io/badge/Neovim-0.11%2B-1c1c1e?style=flat-square&logo=neovim&logoColor=57A143" />
   <img alt="Editor" src="https://img.shields.io/badge/VS%20Code-20%20extensions-1c1c1e?style=flat-square&logo=visualstudiocode&logoColor=007ACC" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-1c1c1e?style=flat-square" />
@@ -30,17 +30,22 @@ machine are the same act — these cannot drift.
 
 | Package | Contents | Links into |
 |---|---|---|
-| `zsh/` | Shell configuration and fzf bindings | `~/`, `~/.config/fzf/` |
+| `zsh/` | `.zshenv` sets `ZDOTDIR="$HOME/.config/zsh"`; everything else (aliases, keybindings, plugins, prompt init, fzf, and its own `starship.toml`) lives under `zsh/.config/zsh/` and loads from there | `~/`, `~/.config/zsh/` |
 | `ghostty/` | Terminal configuration | `~/.config/ghostty/` |
-| `starship/` | Prompt — minimal left side, context on the right | `~/.config/` |
 | `atuin/` | SQLite-backed shell history, shared by zsh and nushell | `~/.config/atuin/` |
 | `nushell/` | Structured-data shell, kept alongside zsh | `~/Library/Application Support/nushell/` |
 | `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim/` |
+| `git/` | `.gitconfig` (delta, rerere, autostash, aliases) and a global `.gitignore` | `~/` |
 
 ```zsh
 cd ~/Documents/portfolio/dotfile
-stow --no-folding -t ~ zsh ghostty starship atuin nushell nvim
+stow --no-folding -t ~ zsh ghostty atuin nushell nvim git
 ```
+
+`zsh/.zshenv` redirects `ZDOTDIR` to `~/.config/zsh`, so zsh reads `.zshrc`
+and friends from there instead of from `~` — that's why the rest of the shell
+config, including the `starship.toml` that `STARSHIP_CONFIG` points at, lives
+under `zsh/.config/zsh/` rather than in a separate `starship/` package.
 
 `--no-folding` creates real directories containing symlinked files, rather than
 symlinking whole directories. Files a tool writes for itself — `lazy-lock.json`,
@@ -60,9 +65,12 @@ restows after adding files.
 | `macos/` | A LaunchAgent and an Automator workflow | Install-once bundles that never drift | `~/Library/LaunchAgents/`, `~/Library/Services/` |
 | `services/` | Finder quick actions | Same | `~/Library/Services/` |
 
-These are copied into place, so a pull does not update the machine.
+These are copied into place, so a pull does not update the machine, and the
+machine can silently drift ahead of the repo. `scripts/dotfiles-sync` catches
+that: it diffs the live `vscode/` and `zen/` files against their tracked
+copies, and with `-y` copies the changes in, commits, and pushes.
 
-**No credentials are committed.** `zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` (excluded from stow via `zsh/.stow-local-ignore`) to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
+**No credentials are committed.** `zsh/.config/zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` (excluded from stow via `zsh/.stow-local-ignore`) to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
 
 The generated shell-integration files under `nushell/` are deliberately absent — regenerate them on a new machine rather than tracking them:
 
@@ -83,20 +91,22 @@ atuin    init nu      | save -f ($nu.default-config-dir | path join atuin.nu)
 | `git-clean-branches` | Scans one level deep for repositories and deletes local branches merged into `main` or `master`, or whose remote-tracking branch is gone. Defaults to preview mode |
 | `repo-sync` | Scans one level deep for repositories under a base directory and fast-forward pulls those behind their upstream. Repositories that are ahead, diverged, or without an upstream are reported and skipped |
 | `send-to-ollama` | Summarises a file through a local Ollama model, writing `<name>-summary.md` alongside the original |
+| `dotfiles-sync` | Diffs the live `vscode/` and `zen/` files (the "Not stowed" packages above) against this repo. `-y` copies changes in, commits, and pushes; `--no-push` commits without pushing. Defaults to preview mode |
 
 ### Installation
 
 ```zsh
 git clone https://github.com/chakri192/dotfile ~/Documents/portfolio/dotfile
 cd ~/Documents/portfolio/dotfile
-chmod +x scripts/*
+./install.sh
 ```
 
-Add to `~/.zshenv`:
+`install.sh` runs everything below in one shot: `brew bundle install`, stow,
+the VS Code and macOS/Finder copies, and `chmod +x scripts/*`. `--dry-run`
+prints the commands without running them. Zen Browser still needs its own
+manual steps — profile directory name is a random per-install UUID.
 
-```zsh
-export PATH="$HOME/Documents/portfolio/dotfile/scripts:$PATH"
-```
+`zsh/.zshenv` puts `scripts/` on `$PATH` itself, so nothing further is needed there.
 
 ### Usage
 
@@ -108,6 +118,8 @@ netinfo                         # network summary
 git-clean-branches              # preview stale branches under the current directory
 git-clean-branches ~/dev -y     # delete them
 repo-sync                       # fast-forward pull repositories under the base directory
+dotfiles-sync                   # preview drift between vscode/zen and the live machine
+dotfiles-sync -y                # pull that drift into the repo, commit, and push
 ```
 
 ### Dependencies
