@@ -54,3 +54,10 @@ _fzf_file_no_hidden() {
   zle reset-prompt
 }
 zle -N _fzf_file_no_hidden
+
+# Navigation helpers (omerxx/dotfiles), ported to fd so they respect
+# .gitignore and skip .git, and to list with the eza alias on arrival.
+cx()  { cd "$@" && la; }                                                     # cd + list
+fcd() { local d; d=$(fd --type d --hidden --exclude .git | fzf) && cd "$d" && la; }
+f()   { fd --type f --hidden --exclude .git | fzf | tr -d '\n' | pbcopy; }   # copy a path
+fv()  { local file; file=$(fd --type f --hidden --exclude .git | fzf) && nvim "$file"; }
