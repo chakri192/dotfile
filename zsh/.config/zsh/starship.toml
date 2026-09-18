@@ -53,3 +53,6 @@ format = "[$symbol $version](purple) "
 success_symbol = "[❯](green)"
 error_symbol   = "[❯](red)"
 vimcmd_symbol  = "[❮](blue)"
+
+[lua]
+symbol = ""
