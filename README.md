@@ -1,280 +1,107 @@
-<div align="center">
-
 # dotfiles
 
-**Configuration and automation for a single macOS machine.**
+My macOS setup: zsh, Ghostty, Neovim, tmux, git, SSH, VS Code, Zen Browser, and a few handy scripts.
 
-Shell utilities, a modular Neovim configuration, editor and browser settings, and Finder quick actions.
+## Install
 
-<p>
-  <img alt="Platform" src="https://img.shields.io/badge/macOS-Apple%20Silicon-1c1c1e?style=flat-square&logo=apple&logoColor=white" />
-  <img alt="Shell" src="https://img.shields.io/badge/zsh-8%20tools-1c1c1e?style=flat-square&logo=gnubash&logoColor=4EAA25" />
-  <img alt="Neovim" src="https://img.shields.io/badge/Neovim-0.11%2B-1c1c1e?style=flat-square&logo=neovim&logoColor=57A143" />
-  <img alt="Editor" src="https://img.shields.io/badge/VS%20Code-20%20extensions-1c1c1e?style=flat-square&logo=visualstudiocode&logoColor=007ACC" />
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-1c1c1e?style=flat-square" />
-</p>
-
-<sub>Tested on an M4 MacBook Air. Each directory is independent and can be adopted separately.</sub>
-
-</div>
-
----
-
-## Contents
-
-### Stow packages
-
-Each directory below mirrors its destination relative to `$HOME`, so GNU Stow
-symlinks it into place. Editing the file in the repository and editing it on the
-machine are the same act — these cannot drift.
-
-| Package | Contents | Links into |
-|---|---|---|
-| `zsh/` | `.zshenv` sets `ZDOTDIR="$HOME/.config/zsh"`; everything else (aliases, keybindings, plugins, prompt init, fzf, and its own `starship.toml`) lives under `zsh/.config/zsh/` and loads from there | `~/`, `~/.config/zsh/` |
-| `ghostty/` | Terminal configuration | `~/.config/ghostty/` |
-| `atuin/` | SQLite-backed shell history, shared by zsh and nushell | `~/.config/atuin/` |
-| `nushell/` | Structured-data shell, kept alongside zsh | `~/Library/Application Support/nushell/` |
-| `nvim/` | Modular configuration — native LSP, Treesitter, lazy.nvim | `~/.config/nvim/` |
-| `git/` | `.gitconfig` (delta, rerere, autostash, aliases) and a global `.gitignore` | `~/` |
-| `tmux/` | XDG-path config — vi copy mode, true color, hand-rolled status line | `~/.config/tmux/` |
-| `ssh/` | Sane `Host *` defaults (agent, keychain, connection reuse); real hosts live in a gitignored `config.local` | `~/.ssh/` |
-
-```zsh
-cd ~/Documents/portfolio/dotfile
-stow --no-folding -t ~ zsh ghostty atuin nushell nvim git tmux ssh
-```
-
-`zsh/.zshenv` redirects `ZDOTDIR` to `~/.config/zsh`, so zsh reads `.zshrc`
-and friends from there instead of from `~` — that's why the rest of the shell
-config, including the `starship.toml` that `STARSHIP_CONFIG` points at, lives
-under `zsh/.config/zsh/` rather than in a separate `starship/` package.
-
-`--no-folding` creates real directories containing symlinked files, rather than
-symlinking whole directories. Files a tool writes for itself — `lazy-lock.json`,
-atuin's databases, nushell's generated init files — then land outside the
-repository instead of silently inside it.
-
-`stow -D -t ~ <package>` removes a package's links; `stow -R -t ~ <package>`
-restows after adding files.
-
-### Not stowed
-
-| Directory | Contents | Why not | Installs to |
-|---|---|---|---|
-| `scripts/` | Five zsh utilities | Already on `$PATH` directly from this repository | `$PATH`, via `~/.zshenv` |
-| `vscode/` | Settings and 20 recommended extensions | VS Code rewrites its own settings file | `~/Library/Application Support/Code/User/` |
-| `zen/` | Zen Browser `user.js`, chrome CSS, theme exports | Profile directory name is a random per-install UUID | Profile root and `chrome/` |
-| `macos/` | A LaunchAgent and an Automator workflow | Install-once bundles that never drift | `~/Library/LaunchAgents/`, `~/Library/Services/` |
-| `services/` | Finder quick actions | Same | `~/Library/Services/` |
-
-These are copied into place, so a pull does not update the machine, and the
-machine can silently drift ahead of the repo. `scripts/dotfiles-sync` catches
-that: it diffs the live `vscode/` and `zen/` files against their tracked
-copies, and with `-y` copies the changes in, commits, and pushes.
-
-**No credentials are committed.** `zsh/.config/zsh/.zshrc` sources `~/.secrets.zsh` if it exists and starts cleanly if it does not. Copy `zsh/secrets.zsh.example` (excluded from stow via `zsh/.stow-local-ignore`) to `~/.secrets.zsh`, fill it in, and `chmod 600` it.
-
-Real SSH hosts follow the same pattern: `ssh/.ssh/config` `Include`s a
-`~/.ssh/config.local` that's never committed (covered by the repo's `*.local`
-`.gitignore` glob). Copy `ssh/.ssh/config.local.example` to `~/.ssh/config.local`
-and add real `Host` blocks there.
-
-The generated shell-integration files under `nushell/` are deliberately absent — regenerate them on a new machine rather than tracking them:
-
-```zsh
-starship init nu      | save -f ($nu.default-config-dir | path join autoload starship.nu)
-zoxide   init nushell | save -f ($nu.default-config-dir | path join zoxide.nu)
-atuin    init nu      | save -f ($nu.default-config-dir | path join atuin.nu)
-```
-
----
-
-## Scripts
-
-| Script | Description |
-|---|---|
-| `clean` | Updates brew, mas, npm, and pip; purges system, VS Code, Zen, and Xcode DerivedData caches; clears logs and trash; flushes DNS; and reports space recovered. `--dry-run` previews without modifying anything. `--node` additionally prunes `node_modules` — opt-in, and destructive |
-| `netinfo` | Reports local IP, public IP, gateway, DNS servers, and the current Wi-Fi network |
-| `git-clean-branches` | Scans one level deep for repositories and deletes local branches merged into `main` or `master`, or whose remote-tracking branch is gone. Defaults to preview mode |
-| `repo-sync` | Scans one level deep for repositories under a base directory and fast-forward pulls those behind their upstream. Repositories that are ahead, diverged, or without an upstream are reported and skipped |
-| `send-to-ollama` | Summarises a file through a local Ollama model, writing `<name>-summary.md` alongside the original |
-| `dotfiles-sync` | Diffs the live `vscode/` and `zen/` files (the "Not stowed" packages above) against this repo. `-y` copies changes in, commits, and pushes; `--no-push` commits without pushing. Defaults to preview mode |
-| `doctor` | Checks every stow package's symlinks actually resolve into this repo (missing, dangling, or shadowed by a real file are each flagged separately), every `Brewfile` dependency is installed, `~/.secrets.zsh` permissions, and that `ZDOTDIR` resolves where `zsh/.zshenv` says it should. Exits 1 if anything's wrong |
-| `macos-defaults` | Finder, Dock, trackpad, and screenshot settings as code instead of manual System Settings clicks — rerunnable after a macOS upgrade resets them. `--dry-run` previews without applying |
-
-### Installation
+Clone it to `~/Documents/portfolio/dotfile`. It works from anywhere, but `repo-sync` and the Send to Ollama quick action expect that path:
 
 ```zsh
 git clone https://github.com/chakri192/dotfile ~/Documents/portfolio/dotfile
 cd ~/Documents/portfolio/dotfile
+./install.sh --dry-run      # see what it will do
 ./install.sh
 ```
 
-`install.sh` runs everything below in one shot: `brew bundle install`, stow,
-the VS Code and macOS/Finder copies, and `chmod +x scripts/*`. `--dry-run`
-prints the commands without running them. Zen Browser still needs its own
-manual steps — profile directory name is a random per-install UUID.
+This installs the apps in the `Brewfile`, links the config files into place with GNU Stow, sets up VS Code, and adds the Finder quick actions and the Caps Lock remap.
 
-`zsh/.zshenv` puts `scripts/` on `$PATH` itself, so nothing further is needed there.
-
-### Usage
+A few things need doing by hand afterwards (the installer lists them):
 
 ```zsh
-clean                           # full cleanup and updates
-clean --dry-run                 # report what would be removed
-clean --node                    # additionally prune node_modules
-netinfo                         # network summary
-git-clean-branches              # preview stale branches under the current directory
-git-clean-branches ~/dev -y     # delete them
-repo-sync                       # fast-forward pull repositories under the base directory
-dotfiles-sync                   # preview drift between vscode/zen and the live machine
-dotfiles-sync -y                # pull that drift into the repo, commit, and push
-doctor                           # health check — stow symlinks, Brewfile, secrets, ZDOTDIR
-macos-defaults --dry-run         # preview system settings changes
-macos-defaults                   # apply them
+cp zsh/secrets.zsh.example ~/.secrets.zsh && chmod 600 ~/.secrets.zsh   # your API keys
+cp ssh/.ssh/config.local.example ~/.ssh/config.local                   # your SSH hosts
+nvim                                                                   # installs plugins on first launch
+doctor                                                                 # checks everything is set up
 ```
 
-### Dependencies
+## What's included
 
-`zsh` is required. `curl` is used by `netinfo` for public IP lookup. `tmux` is used by nothing in `scripts/` directly but is required for the `tmux/` package. Homebrew, `mas`, `npm`, and `pip3` are each optional and skipped by `clean` when absent. `clean` requires `sudo` for periodic maintenance and DNS flushing. `doctor` needs `brew` to check `Brewfile` coverage — skipped with a note if absent.
-
----
-
-## macOS integration
-
-### Caps Lock remapping
-
-`macos/launchagents/com.user.capslock-remap.plist` remaps Caps Lock to Right Command using the native `hidutil` interface, with no third-party remapping software.
-
-```zsh
-cp macos/launchagents/com.user.capslock-remap.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.user.capslock-remap.plist
-```
-
-### Finder quick actions
-
-| Action | Description |
+| Folder | |
 |---|---|
-| **New Item** | Creates an empty file from the right-click menu |
-| **Send to Gmail** | Sends selected files as attachments through Mail.app via AppleScript |
-| **Send to Ollama** | Runs selected files through `scripts/send-to-ollama` and writes a summary alongside each original |
+| `zsh/` | Shell config: aliases, key bindings, plugins (autosuggestions, history search, vi mode), and a Starship prompt |
+| `ghostty/` | Terminal settings: JetBrains Mono, black background, bright colours |
+| `nvim/` | Neovim setup (see below) |
+| `tmux/` | Prefix `Ctrl-a`, mouse support, vi copy mode |
+| `git/` | delta for diffs, useful aliases, a global ignore file |
+| `ssh/` | Sensible defaults; your own hosts go in `~/.ssh/config.local` |
+| `atuin/`, `nushell/` | Shell history and an alternative shell |
+| `vscode/` | Settings and 20 extensions |
+| `zen/` | Zen Browser speed, privacy, and theme settings |
+| `macos/`, `services/` | Caps Lock → Command, and Finder quick actions |
 
-```zsh
-cp -R "services/finder-new-item/New Item.workflow" ~/Library/Services/
-cp -R "macos/automator/Send to Gmail.workflow" ~/Library/Services/
-cp -R "services/send-to-ollama/Send to Ollama.workflow" ~/Library/Services/
-```
+## Scripts
 
-Send to Ollama requires `scripts/send-to-ollama` on `$PATH` and `bat` for content extraction. Its Run Shell Script step invokes the script at the literal path `$HOME/Documents/portfolio/dotfile/scripts/send-to-ollama`, so the repository must be cloned to that location or the workflow edited. See [`services/README.md`](services/README.md).
+These are available in the terminal after install.
 
-| Quick Action | Demonstration |
+| Command | |
 |---|---|
-| New Item | ![new item](assets/demos/new-item.gif) |
-| Send to Gmail | ![send to gmail](assets/demos/send-to-gmail-1.gif) ![send to gmail](assets/demos/send-to-gmail-2.gif) |
-| Send to Ollama | ![send to ollama](assets/demos/send-to-ollama.gif) |
+| `clean` | Update Homebrew and other package managers, clear caches and the Trash, and show how much space was freed. `--dry-run` to preview |
+| `netinfo` | Local and public IP, router, DNS, and Wi-Fi network |
+| `doctor` | Check that everything is installed and linked correctly |
+| `repo-sync` | Pull the latest changes for every repo in `~/Documents/portfolio` |
+| `git-clean-branches` | Delete old merged branches in your repos. Shows them first; add `-y` to delete |
+| `dotfiles-sync` | Copy changed VS Code and Zen settings back into this repo. Add `-y` to commit and push |
+| `macos-defaults` | Apply my Finder, Dock, trackpad, and screenshot settings. `--dry-run` to preview |
+| `send-to-ollama` | Summarise files with a local AI model |
 
----
+## Finder quick actions
+
+Right-click files in Finder → Quick Actions:
+
+| Action | |
+|---|---|
+| New Item | Create an empty file in the current folder |
+| Send to Gmail | Attach the selected files to a new email |
+| Send to Ollama | Summarise the selected files with a local AI model |
+
+| New Item | Send to Gmail | Send to Ollama |
+|---|---|---|
+| ![](assets/demos/new-item.gif) | ![](assets/demos/send-to-gmail-1.gif) | ![](assets/demos/send-to-ollama.gif) |
 
 ## Neovim
 
-A modular configuration targeting **Neovim 0.11 or later**, built on [lazy.nvim](https://github.com/folke/lazy.nvim) with the native LSP API (`vim.lsp.config` and `vim.lsp.enable`), Treesitter from the `main` branch, and [blink.cmp](https://github.com/saghen/blink.cmp) completion.
+Needs Neovim 0.11+, `tree-sitter`, ripgrep, and a Nerd Font (all in the `Brewfile`).
 
-### Layout
+- Language support for Python, C/C++, Rust, Go, JavaScript/TypeScript, Lua, Bash, JSON, YAML, TOML, Markdown, HTML, and CSS
+- Autocomplete, formatting on save, and linting
+- File search with Telescope
+- Git: gitsigns, Neogit, diffview
+- Debugging for Python, C/C++, and Rust
+- Tokyo Night theme
 
-| Path | Contents |
-|---|---|
-| `nvim/.config/nvim/init.lua` | Leader keys, PATH shim for spawned jobs, module loader |
-| `nvim/.config/nvim/lua/config/` | `options`, `keymaps`, `autocmds`, lazy bootstrap |
-| `nvim/.config/nvim/lua/plugins/` | One file per concern — LSP, completion, Treesitter, Telescope, git, UI, editor, DAP, linting |
-| `nvim/stylua.toml` · `nvim/ruff.toml` · `nvim/clang-format` | Formatter and linter configuration referenced by conform and ruff |
+After the first launch, install the formatters and linters:
 
-### Configuration
-
-| Area | Detail |
-|---|---|
-| LSP | Native, without the lspconfig framework: pyright, ruff, clangd, lua_ls, bashls, ts_ls, rust_analyzer, gopls, jsonls, yamlls, taplo, marksman, html, cssls, installed through [mason](https://github.com/mason-org/mason.nvim) |
-| Completion | blink.cmp with LSP, snippet, path, buffer, and lazydev sources |
-| Syntax | Treesitter `main` branch — highlighting, indentation, folds, sticky context, textobjects |
-| Fuzzy finding | Telescope with fzf-native |
-| Git | gitsigns for hunks; Neogit and diffview for staging and commits |
-| Formatting | conform on save — stylua, ruff, clang-format, shfmt, prettier, rustfmt, goimports, taplo |
-| Linting | ruff and clang-tidy, plus nvim-lint for shellcheck, yamllint, markdownlint, and hadolint |
-| Debugging | nvim-dap with dap-ui — Python through debugpy, C/C++/Rust through codelldb |
-| Quality of life | flash, oil, todo-comments, render-markdown, which-key, trouble, toggleterm, tokyonight |
-
-### Installation
-
-```zsh
-[ -e ~/.config/nvim ] && mv ~/.config/nvim ~/.config/nvim.bak
-stow --no-folding -d ~/Documents/portfolio/dotfile -t ~ nvim
-nvim   # lazy.nvim bootstraps and installs plugins on first launch
+```vim
+:MasonInstall prettierd shfmt stylua taplo goimports yamlfmt shellcheck markdownlint-cli2 yamllint hadolint debugpy codelldb
 ```
-
-Then install the external tool binaries through mason:
-
-```
-:MasonInstall prettierd shfmt stylua taplo goimports yamlfmt \
-  shellcheck markdownlint-cli2 yamllint hadolint debugpy codelldb
-```
-
-### Dependencies
-
-Neovim 0.11 or later is required for the native LSP API. The Treesitter `main` branch invokes the **tree-sitter CLI** to compile parsers (`brew install tree-sitter`), which in turn requires a **C compiler**. **ripgrep** backs Telescope live-grep and `:grep`. A **Nerd Font** provides the icons used in the statusline, file tree, and completion menu. Per-language toolchains — `go`, `cargo`, `node` — are required for the corresponding servers and formatters.
-
----
-
-## VS Code
-
-Settings tuned for Python, JavaScript and TypeScript, C and C++, and web development.
-
-| Area | Configuration |
-|---|---|
-| Performance | Accessibility support and telemetry disabled, smooth scrolling, reduced minimap |
-| Typography | JetBrains Mono with ligatures at 13.5px |
-| File management | Smart nesting for related files — `.ts` with `.js`, `.h` with `.c` |
-| Formatting | Prettier for JS and JSON, Ruff for Python, both on save |
-| Editing | Bracket pair colourisation, sticky scroll, linked editing, indentation guides |
-| Language overrides | Python (Ruff with import organisation), Markdown (word wrap, no formatting), JSON |
-
-```zsh
-cp vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
-jq -r '.recommendations[]' vscode/extensions.json | xargs -n1 code --install-extension
-```
-
-Twenty extensions spanning Python, C and C++, web, git, and AI tooling. The complete list is in `vscode/extensions.json`.
-
----
 
 ## Zen Browser
 
-Performance and privacy configuration for [Zen Browser](https://zen-browser.app), tuned for Apple Silicon.
-
-| File | Location in profile | Purpose |
-|---|---|---|
-| `zen/user.js` | Profile root | `about:config` overrides applied on every launch |
-| `zen/userChrome.css` | `chrome/` | Browser interface customisation |
-| `zen/userContent.css` | `chrome/` | Page-level style overrides |
-| `zen/zen-themes.css` | `chrome/` | Zen-specific theme overrides |
-| `zen/zen-themes/` | `chrome/zen-themes/` | Exported Zen Theme Store themes |
-
-`user.js` covers four areas: **performance** (WebRender and Metal compositor, 60fps frame rate, HTTP/3, DNS prefetch, enlarged caches), **memory** (incremental garbage collection, background tab unloading after three minutes, reduced session I/O), **privacy** (social, fingerprinting, and cryptomining tracker blocking; all telemetry disabled), and **Apple Silicon** (Metal GPU API, hardware video decoding, asynchronous scrolling, zero paint delay).
+Find your profile folder in Zen at `about:support` → Profile Folder, then:
 
 ```zsh
-# Locate the profile: Zen → about:support → Profile Folder
 PROFILE="$HOME/Library/Application Support/zen/Profiles/<your-profile>"
-
 cp zen/user.js "$PROFILE/"
+mkdir -p "$PROFILE/chrome"
 cp zen/userChrome.css zen/userContent.css zen/zen-themes.css "$PROFILE/chrome/"
 cp -R zen/zen-themes "$PROFILE/chrome/"
 ```
 
-Restart Zen. `user.js` values are applied on every launch and override `prefs.js`.
+Restart Zen.
 
----
+## Credits
 
-## Environment
-
-macOS on Apple Silicon, zsh, VS Code, and Zen Browser. Tested on an M4 MacBook Air.
+The zsh setup started from [radleylewis/zsh](https://github.com/radleylewis/zsh).
 
 ## License
 
@@ -286,5 +113,3 @@ macOS on Apple Silicon, zsh, VS Code, and Zen Browser. Tested on an M4 MacBook A
 |---|---|
 | [chakri192](https://github.com/chakri192) | Author |
 | [aider](https://github.com/Aider-AI/aider) | AI pair programmer |
-
-Documentation assisted by aider using local models through [Ollama](https://ollama.com): `qwen2.5-coder:7b` for code and `llama3.1:8b` for prose.
